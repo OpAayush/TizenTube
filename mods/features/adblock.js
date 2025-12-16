@@ -1,8 +1,14 @@
-import { configRead } from '../config.js';
-import Chapters from '../ui/chapters.js';
-import resolveCommand from '../resolveCommand.js';
-import { timelyAction, longPressData, MenuServiceItemRenderer, ShelfRenderer, TileRenderer } from '../ui/ytUI.js';
-import { PatchSettings } from '../ui/customYTSettings.js';
+import { configRead } from "../config.js";
+import Chapters from "../ui/chapters.js";
+import resolveCommand from "../resolveCommand.js";
+import {
+  timelyAction,
+  longPressData,
+  MenuServiceItemRenderer,
+  ShelfRenderer,
+  TileRenderer,
+} from "../ui/ytUI.js";
+import { PatchSettings } from "../ui/customYTSettings.js";
 
 /**
  * This is a minimal reimplementation of the following uBlock Origin rule:
@@ -16,7 +22,7 @@ import { PatchSettings } from '../ui/customYTSettings.js';
 const origParse = JSON.parse;
 JSON.parse = function () {
   const r = origParse.apply(this, arguments);
-  const adBlockEnabled = configRead('enableAdBlock');
+  const adBlockEnabled = configRead("enableAdBlock");
 
   if (r.adPlacements && adBlockEnabled) {
     r.adPlacements = [];
@@ -32,18 +38,25 @@ JSON.parse = function () {
     r.adSlots = [];
   }
 
-  if (r.paidContentOverlay && !configRead('enablePaidPromotionOverlay')) {
+  if (r.paidContentOverlay && !configRead("enablePaidPromotionOverlay")) {
     r.paidContentOverlay = null;
   }
 
-  if (r?.streamingData?.adaptiveFormats && configRead('videoPreferredCodec') !== 'any') {
-    const preferredCodec = configRead('videoPreferredCodec');
-    const hasPreferredCodec = r.streamingData.adaptiveFormats.find(format => format.mimeType.includes(preferredCodec));
+  if (
+    r?.streamingData?.adaptiveFormats &&
+    configRead("videoPreferredCodec") !== "any"
+  ) {
+    const preferredCodec = configRead("videoPreferredCodec");
+    const hasPreferredCodec = r.streamingData.adaptiveFormats.find((format) =>
+      format.mimeType.includes(preferredCodec)
+    );
     if (hasPreferredCodec) {
-      r.streamingData.adaptiveFormats = r.streamingData.adaptiveFormats.filter(format => {
-        if (format.mimeType.startsWith('audio/')) return true;
-        return format.mimeType.includes(preferredCodec);
-      });
+      r.streamingData.adaptiveFormats = r.streamingData.adaptiveFormats.filter(
+        (format) => {
+          if (format.mimeType.startsWith("audio/")) return true;
+          return format.mimeType.includes(preferredCodec);
+        }
+      );
     }
   }
 
@@ -58,7 +71,8 @@ JSON.parse = function () {
           (elm) => !elm.adSlotRenderer
         );
 
-      for (const shelve of r.contents.tvBrowseRenderer.content.tvSurfaceContentRenderer.content.sectionListRenderer.contents) {
+      for (const shelve of r.contents.tvBrowseRenderer.content
+        .tvSurfaceContentRenderer.content.sectionListRenderer.contents) {
         if (shelve.shelfRenderer) {
           shelve.shelfRenderer.content.horizontalListRenderer.items =
             shelve.shelfRenderer.content.horizontalListRenderer.items.filter(
@@ -68,17 +82,22 @@ JSON.parse = function () {
       }
     }
 
-    processShelves(r.contents.tvBrowseRenderer.content.tvSurfaceContentRenderer.content.sectionListRenderer.contents);
+    processShelves(
+      r.contents.tvBrowseRenderer.content.tvSurfaceContentRenderer.content
+        .sectionListRenderer.contents
+    );
   }
 
-  if (r.endscreen && configRead('enableHideEndScreenCards')) {
+  if (r.endscreen && configRead("enableHideEndScreenCards")) {
     r.endscreen = null;
   }
 
-  if (r.messages && Array.isArray(r.messages) && !configRead('enableYouThereRenderer')) {
-    r.messages = r.messages.filter(
-      (msg) => !msg?.youThereRenderer
-    );
+  if (
+    r.messages &&
+    Array.isArray(r.messages) &&
+    !configRead("enableYouThereRenderer")
+  ) {
+    r.messages = r.messages.filter((msg) => !msg?.youThereRenderer);
   }
 
   // Remove shorts ads
@@ -108,35 +127,53 @@ JSON.parse = function () {
     deArrowify(r.continuationContents.horizontalListContinuation.items);
     hqify(r.continuationContents.horizontalListContinuation.items);
     addLongPress(r.continuationContents.horizontalListContinuation.items);
-    r.continuationContents.horizontalListContinuation.items = hideVideo(r.continuationContents.horizontalListContinuation.items);
+    r.continuationContents.horizontalListContinuation.items = hideVideo(
+      r.continuationContents.horizontalListContinuation.items
+    );
   }
 
-  if (r?.contents?.tvBrowseRenderer?.content?.tvSecondaryNavRenderer?.sections) {
-    for (const section of r.contents.tvBrowseRenderer.content.tvSecondaryNavRenderer.sections) {
+  if (
+    r?.contents?.tvBrowseRenderer?.content?.tvSecondaryNavRenderer?.sections
+  ) {
+    for (const section of r.contents.tvBrowseRenderer.content
+      .tvSecondaryNavRenderer.sections) {
       for (const tab of section.tvSecondaryNavSectionRenderer.tabs) {
-        processShelves(tab.tabRenderer.content.tvSurfaceContentRenderer.content.sectionListRenderer.contents);
+        processShelves(
+          tab.tabRenderer.content.tvSurfaceContentRenderer.content
+            .sectionListRenderer.contents
+        );
       }
     }
   }
 
   if (r?.contents?.singleColumnWatchNextResults?.pivot?.sectionListRenderer) {
-    processShelves(r.contents.singleColumnWatchNextResults.pivot.sectionListRenderer.contents, false);
+    processShelves(
+      r.contents.singleColumnWatchNextResults.pivot.sectionListRenderer
+        .contents,
+      false
+    );
     if (window.queuedVideos.videos.length > 0) {
       const queuedVideosClone = window.queuedVideos.videos.slice();
-      queuedVideosClone.unshift(TileRenderer(
-        'Clear Queue',
-        {
+      queuedVideosClone.unshift(
+        TileRenderer("Clear Queue", {
           customAction: {
-            action: 'CLEAR_QUEUE'
-          }
-        }));
-      r.contents.singleColumnWatchNextResults.pivot.sectionListRenderer.contents.unshift(ShelfRenderer(
-        'Queued Videos',
-        queuedVideosClone,
-        queuedVideosClone.findIndex(v => v.contentId === window.queuedVideos.lastVideoId) !== -1 ?
-          queuedVideosClone.findIndex(v => v.contentId === window.queuedVideos.lastVideoId)
-          : 0
-      ));
+            action: "CLEAR_QUEUE",
+          },
+        })
+      );
+      r.contents.singleColumnWatchNextResults.pivot.sectionListRenderer.contents.unshift(
+        ShelfRenderer(
+          "Queued Videos",
+          queuedVideosClone,
+          queuedVideosClone.findIndex(
+            (v) => v.contentId === window.queuedVideos.lastVideoId
+          ) !== -1
+            ? queuedVideosClone.findIndex(
+                (v) => v.contentId === window.queuedVideos.lastVideoId
+              )
+            : 0
+        )
+      );
     }
   }
   /*
@@ -161,25 +198,28 @@ JSON.parse = function () {
 
   // Manual SponsorBlock Skips
 
-  if (configRead('sponsorBlockManualSkips').length > 0 && r?.playerOverlays?.playerOverlayRenderer) {
-    const manualSkippedSegments = configRead('sponsorBlockManualSkips');
+  if (
+    configRead("sponsorBlockManualSkips").length > 0 &&
+    r?.playerOverlays?.playerOverlayRenderer
+  ) {
+    const manualSkippedSegments = configRead("sponsorBlockManualSkips");
     let timelyActions = [];
     if (window?.sponsorblock?.segments) {
       for (const segment of window.sponsorblock.segments) {
         if (manualSkippedSegments.includes(segment.category)) {
           const timelyActionData = timelyAction(
             `Skip ${segment.category}`,
-            'SKIP_NEXT',
+            "SKIP_NEXT",
             {
               clickTrackingParams: null,
               showEngagementPanelEndpoint: {
                 customAction: {
-                  action: 'SKIP',
+                  action: "SKIP",
                   parameters: {
-                    time: segment.segment[1]
-                  }
-                }
-              }
+                    time: segment.segment[1],
+                  },
+                },
+              },
             },
             segment.segment[0] * 1000,
             segment.segment[1] * 1000 - segment.segment[0] * 1000
@@ -187,7 +227,8 @@ JSON.parse = function () {
           timelyActions.push(timelyActionData);
         }
       }
-      r.playerOverlays.playerOverlayRenderer.timelyActionRenderers = timelyActions;
+      r.playerOverlays.playerOverlayRenderer.timelyActionRenderers =
+        timelyActions;
     }
   } else if (r?.playerOverlays?.playerOverlayRenderer) {
     r.playerOverlays.playerOverlayRenderer.timelyActionRenderers = [];
@@ -199,11 +240,14 @@ JSON.parse = function () {
 // Patch JSON.parse to use the custom one
 window.JSON.parse = JSON.parse;
 for (const key in window._yttv) {
-  if (window._yttv[key] && window._yttv[key].JSON && window._yttv[key].JSON.parse) {
+  if (
+    window._yttv[key] &&
+    window._yttv[key].JSON &&
+    window._yttv[key].JSON.parse
+  ) {
     window._yttv[key].JSON.parse = JSON.parse;
   }
 }
-
 
 function processShelves(shelves, shouldAddPreviews = true) {
   for (const shelve of shelves) {
@@ -214,16 +258,23 @@ function processShelves(shelves, shouldAddPreviews = true) {
       if (shouldAddPreviews) {
         addPreviews(shelve.shelfRenderer.content.horizontalListRenderer.items);
       }
-      shelve.shelfRenderer.content.horizontalListRenderer.items = hideVideo(shelve.shelfRenderer.content.horizontalListRenderer.items);
-      if (!configRead('enableShorts')) {
-        shelve.shelfRenderer.content.horizontalListRenderer.items = shelve.shelfRenderer.content.horizontalListRenderer.items.filter(item => item.tileRenderer?.tvhtml5ShelfRendererType !== 'TVHTML5_TILE_RENDERER_TYPE_SHORTS');
+      shelve.shelfRenderer.content.horizontalListRenderer.items = hideVideo(
+        shelve.shelfRenderer.content.horizontalListRenderer.items
+      );
+      if (!configRead("enableShorts")) {
+        shelve.shelfRenderer.content.horizontalListRenderer.items =
+          shelve.shelfRenderer.content.horizontalListRenderer.items.filter(
+            (item) =>
+              item.tileRenderer?.tvhtml5ShelfRendererType !==
+              "TVHTML5_TILE_RENDERER_TYPE_SHORTS"
+          );
       }
     }
   }
 }
 
 function addPreviews(items) {
-  if (!configRead('enablePreviews')) return;
+  if (!configRead("enablePreviews")) return;
   for (const item of items) {
     if (item.tileRenderer) {
       const watchEndpoint = item.tileRenderer.onSelectCommand;
@@ -237,8 +288,8 @@ function addPreviews(items) {
           muted: false,
           restartPlaybackBeforeSeconds: 10,
           resumeVideo: true,
-          playbackEndpoint: watchEndpoint
-        }
+          playbackEndpoint: watchEndpoint,
+        },
       };
     }
   }
@@ -252,45 +303,62 @@ function deArrowify(items) {
       continue;
     }
     if (!item.tileRenderer) continue;
-    if (configRead('enableDeArrow')) {
+    if (configRead("enableDeArrow")) {
       const videoID = item.tileRenderer.contentId;
-      fetch(`https://sponsor.ajay.app/api/branding?videoID=${videoID}`).then(res => res.json()).then(data => {
-        if (data.titles.length > 0) {
-          const mostVoted = data.titles.reduce((max, title) => max.votes > title.votes ? max : title);
-          item.tileRenderer.metadata.tileMetadataRenderer.title.simpleText = mostVoted.title;
-        }
-
-        if (data.thumbnails.length > 0 && configRead('enableDeArrowThumbnails')) {
-          const mostVotedThumbnail = data.thumbnails.reduce((max, thumbnail) => max.votes > thumbnail.votes ? max : thumbnail);
-          if (mostVotedThumbnail.timestamp) {
-            item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails = [
-              {
-                url: `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoID}&time=${mostVotedThumbnail.timestamp}`,
-                width: 1280,
-                height: 640
-              }
-            ]
+      fetch(`https://sponsor.ajay.app/api/branding?videoID=${videoID}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.titles.length > 0) {
+            const mostVoted = data.titles.reduce((max, title) =>
+              max.votes > title.votes ? max : title
+            );
+            item.tileRenderer.metadata.tileMetadataRenderer.title.simpleText =
+              mostVoted.title;
           }
-        }
-      }).catch(() => { });
+
+          if (
+            data.thumbnails.length > 0 &&
+            configRead("enableDeArrowThumbnails")
+          ) {
+            const mostVotedThumbnail = data.thumbnails.reduce(
+              (max, thumbnail) =>
+                max.votes > thumbnail.votes ? max : thumbnail
+            );
+            if (mostVotedThumbnail.timestamp) {
+              item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails =
+                [
+                  {
+                    url: `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoID}&time=${mostVotedThumbnail.timestamp}`,
+                    width: 1280,
+                    height: 640,
+                  },
+                ];
+            }
+          }
+        })
+        .catch(() => {});
     }
   }
 }
 
-
 function hqify(items) {
   for (const item of items) {
     if (!item.tileRenderer) continue;
-    if (item.tileRenderer.style !== 'TILE_STYLE_YTLR_DEFAULT') continue;
-    if (configRead('enableHqThumbnails')) {
+    if (item.tileRenderer.style !== "TILE_STYLE_YTLR_DEFAULT") continue;
+    if (configRead("enableHqThumbnails")) {
       const videoID = item.tileRenderer.onSelectCommand.watchEndpoint.videoId;
-      const queryArgs = item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails[0].url.split('?')[1];
+      const queryArgs =
+        item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails[0].url.split(
+          "?"
+        )[1];
       item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails = [
         {
-          url: `https://i.ytimg.com/vi/${videoID}/sddefault.jpg${queryArgs ? `?${queryArgs}` : ''}`,
+          url: `https://i.ytimg.com/vi/${videoID}/sddefault.jpg${
+            queryArgs ? `?${queryArgs}` : ""
+          }`,
           width: 640,
-          height: 480
-        }
+          height: 480,
+        },
       ];
     }
   }
@@ -299,44 +367,72 @@ function hqify(items) {
 function addLongPress(items) {
   for (const item of items) {
     if (!item.tileRenderer) continue;
-    if (item.tileRenderer.style !== 'TILE_STYLE_YTLR_DEFAULT') continue;
+    if (item.tileRenderer.style !== "TILE_STYLE_YTLR_DEFAULT") continue;
     if (item.tileRenderer.onLongPressCommand) {
-      item.tileRenderer.onLongPressCommand.showMenuCommand.menu.menuRenderer.items.push(MenuServiceItemRenderer('Add to Queue', {
-        clickTrackingParams: null,
-        playlistEditEndpoint: {
-          customAction: {
-            action: 'ADD_TO_QUEUE',
-            parameters: item
-          }
-        }
-      }));
+      item.tileRenderer.onLongPressCommand.showMenuCommand.menu.menuRenderer.items.push(
+        MenuServiceItemRenderer("Add to Queue", {
+          clickTrackingParams: null,
+          playlistEditEndpoint: {
+            customAction: {
+              action: "ADD_TO_QUEUE",
+              parameters: item,
+            },
+          },
+        })
+      );
       continue;
     }
-    if (!configRead('enableLongPress')) continue;
-    const subtitle = item.tileRenderer.metadata.tileMetadataRenderer.lines[0].lineRenderer.items[0].lineItemRenderer.text;
+    if (!configRead("enableLongPress")) continue;
+
+    const subtitle =
+      item.tileRenderer.metadata.tileMetadataRenderer.lines[0].lineRenderer
+        .items[0].lineItemRenderer.text;
+
+    // Extract Channel Endpoint from the shortBylineText (usually where channel name is)
+    let channelEndpoint = null;
+    if (item.tileRenderer.shortBylineText?.runs?.[0]?.navigationEndpoint) {
+      channelEndpoint =
+        item.tileRenderer.shortBylineText.runs[0].navigationEndpoint;
+    }
+
     const data = longPressData({
       videoId: item.tileRenderer.contentId,
-      thumbnails: item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails,
+      thumbnails:
+        item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails,
       title: item.tileRenderer.metadata.tileMetadataRenderer.title.simpleText,
       subtitle: subtitle.runs ? subtitle.runs[0].text : subtitle.simpleText,
       watchEndpointData: item.tileRenderer.onSelectCommand.watchEndpoint,
-      item
+      item,
+      channelEndpoint,
     });
     item.tileRenderer.onLongPressCommand = data;
   }
 }
 
 function hideVideo(items) {
-  return items.filter(item => {
+  return items.filter((item) => {
     if (!item.tileRenderer) return true;
-    const progressBar = item.tileRenderer.header?.tileHeaderRenderer?.thumbnailOverlays?.find(overlay => overlay.thumbnailOverlayResumePlaybackRenderer)?.thumbnailOverlayResumePlaybackRenderer;
+    const progressBar =
+      item.tileRenderer.header?.tileHeaderRenderer?.thumbnailOverlays?.find(
+        (overlay) => overlay.thumbnailOverlayResumePlaybackRenderer
+      )?.thumbnailOverlayResumePlaybackRenderer;
     if (!progressBar) return true;
-    const pages = configRead('hideWatchedVideosPages');
+    const pages = configRead("hideWatchedVideosPages");
     const hash = location.hash.substring(1);
-    const pageName = hash === '/' ? 'home' : hash.startsWith('/search') ? 'search' : hash.split('?')[1].split('&')[0].split('=')[1].replace('FE', '').replace('topics_', '');
+    const pageName =
+      hash === "/"
+        ? "home"
+        : hash.startsWith("/search")
+        ? "search"
+        : hash
+            .split("?")[1]
+            .split("&")[0]
+            .split("=")[1]
+            .replace("FE", "")
+            .replace("topics_", "");
     if (!pages.includes(pageName)) return true;
 
-    const percentWatched = (progressBar.percentDurationWatched || 0);
-    return percentWatched <= configRead('hideWatchedVideosThreshold');
+    const percentWatched = progressBar.percentDurationWatched || 0;
+    return percentWatched <= configRead("hideWatchedVideosThreshold");
   });
 }
