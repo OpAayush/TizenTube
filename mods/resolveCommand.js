@@ -24,7 +24,7 @@ export function findFunction(funcName) {
     }
 }
 
-// Patch resolveCommand to be able to change TizenTube settings
+// Patch resolveCommand to be able to change AixoTube settings
 
 export function patchResolveCommand() {
     for (const key in window._yttv) {
@@ -33,7 +33,7 @@ export function patchResolveCommand() {
             const ogResolve = window._yttv[key].instance.resolveCommand;
             window._yttv[key].instance.resolveCommand = function (cmd, _) {
                 if (cmd.setClientSettingEndpoint) {
-                    // Command to change client settings. Use TizenTube configuration to change settings.
+                    // Command to change client settings. Use AixoTube configuration to change settings.
                     for (const settings of cmd.setClientSettingEndpoint.settingDatas) {
                         if (!settings.clientSettingEnum.item.includes('_')) {
                             for (const setting of cmd.setClientSettingEndpoint.settingDatas) {
@@ -75,11 +75,11 @@ export function patchResolveCommand() {
                     customAction(cmd.playlistEditEndpoint.customAction.action, cmd.playlistEditEndpoint.customAction.parameters);
                     return true;
                 } else if (cmd?.openPopupAction?.uniqueId === 'playback-settings') {
-                    // Patch the playback settings popup to use TizenTube speed settings
+                    // Patch the playback settings popup to use AixoTube speed settings
                     const items = cmd.openPopupAction.popup.overlaySectionRenderer.overlay.overlayTwoPanelRenderer.actionPanel.overlayPanelRenderer.content.overlayPanelItemListRenderer.items;
                     for (const item of items) {
                         if (item?.compactLinkRenderer?.icon?.iconType === 'SLOW_MOTION_VIDEO') {
-                            item.compactLinkRenderer.subtitle && (item.compactLinkRenderer.subtitle.simpleText = 'with TizenTube');
+                            item.compactLinkRenderer.subtitle && (item.compactLinkRenderer.subtitle.simpleText = 'with AixoTube');
                             item.compactLinkRenderer.serviceEndpoint = {
                                 clickTrackingParams: "null",
                                 signalAction: {
@@ -193,7 +193,7 @@ function customAction(action, parameters) {
             break;
         case 'UPDATE_DOWNLOAD':
             window.h5vcc.tizentube.InstallAppFromURL(parameters);
-            showToast('TizenTube Update', 'Downloading update, please wait...');
+            showToast('AixoTube Update', 'Downloading update, please wait...');
             break;
         case 'SET_PLAYER_SPEED':
             const speed = Number(parameters);
@@ -206,15 +206,15 @@ function customAction(action, parameters) {
             window.h5vcc.tizentube.EnterPIP();
             break;
         case 'SHOW_TOAST':
-            showToast('TizenTube', parameters);
+            showToast('AixoTube', parameters);
             break;
         case 'ADD_TO_QUEUE':
             window.queuedVideos.videos.push(parameters);
-            showToast('TizenTube', 'Video added to queue.');
+            showToast('AixoTube', 'Video added to queue.');
             break;
         case 'CLEAR_QUEUE':
             window.queuedVideos.videos = [];
-            showToast('TizenTube', 'Video queue cleared.');
+            showToast('AixoTube', 'Video queue cleared.');
             break;
         case 'CHECK_FOR_UPDATES':
             checkForUpdates(true);

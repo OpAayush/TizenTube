@@ -1,5 +1,5 @@
 {
-  "name": "@tizentube/mods",
+  "name": "@axotube/mods",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "build": "rollup -c rollup.config.js"
   },
   "keywords": [],
-  "author": "Reis Can, YouTube WebOs contributors",
+  "author": "Aayu5h (fork by Aayu5h, original by Reis Can)",
   "license": "GPL-3.0-only",
   "dependencies": {
     "@babel/preset-env": "^7.22.9",

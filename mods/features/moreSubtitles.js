@@ -1,4 +1,4 @@
-// TizenTube Subtitle Localization Mod
+// AixoTube Subtitle Localization Mod
 // Automatically adds user's local language to subtitle auto-translate menu if not present
 
 import { configRead } from "../config.js";
@@ -59,7 +59,7 @@ export function getCountryLanguage(countryCode) {
 
         return { code: lang, name };
     } catch (e) {
-        console.warn("TizenTube Subtitle Localization: Could not infer language for country", countryCode, e);
+        console.warn("AixoTube Subtitle Localization: Could not infer language for country", countryCode, e);
         return null;
     }
 }
@@ -75,12 +75,12 @@ function getUserCountryCode() {
         }
 
         console.warn(
-            "TizenTube Subtitle Localization: Could not determine user country code"
+            "AixoTube Subtitle Localization: Could not determine user country code"
         );
         return null;
     } catch (error) {
         console.error(
-            "TizenTube Subtitle Localization: Error getting country code:",
+            "AixoTube Subtitle Localization: Error getting country code:",
             error
         );
         return null;
@@ -211,10 +211,10 @@ function patchSubtitleMenu() {
     ) {
         if (!yttvInstance) {
             console.warn(
-                "TizenTube Subtitle Localization: Could not find resolveCommand instance."
+                "AixoTube Subtitle Localization: Could not find resolveCommand instance."
             );
         } else {
-            console.log("TizenTube Subtitle Localization: Already patched.");
+            console.log("AixoTube Subtitle Localization: Already patched.");
         }
         return;
     }
@@ -255,7 +255,7 @@ function patchSubtitleMenu() {
                         !languageExistsInMenu(items, userLanguage.code, userLanguage.name)
                     ) {
                         console.log(
-                            `%c[TizenTube Subtitle Localization] Adding user's local language: ${userLanguage.name} (${userLanguage.code})`,
+                            `%c[AixoTube Subtitle Localization] Adding user's local language: ${userLanguage.name} (${userLanguage.code})`,
                             "background: #2196F3; color: #ffffff; font-size: 14px; font-weight: bold;"
                         );
 
@@ -305,13 +305,13 @@ function patchSubtitleMenu() {
                         }
                     } else {
                         console.log(
-                            `%c[TizenTube Subtitle Localization] User's language ${userLanguage.name} already exists in menu`,
+                            `%c[AixoTube Subtitle Localization] User's language ${userLanguage.name} already exists in menu`,
                             "background: #4CAF50; color: #ffffff; font-size: 12px;"
                         );
                     }
                 } else {
                     console.warn(
-                        `TizenTube Subtitle Localization: No language mapping found for country code: ${userCountryCode}`
+                        `AixoTube Subtitle Localization: No language mapping found for country code: ${userCountryCode}`
                     );
                 }
             }
@@ -324,7 +324,7 @@ function patchSubtitleMenu() {
 
                 if (missingLanguages.length > 0) {
                     console.log(
-                        `%c[TizenTube Subtitle Localization] Adding "Tizen Languages" section with ${missingLanguages.length} additional languages`,
+                        `%c[AixoTube Subtitle Localization] Adding "Tizen Languages" section with ${missingLanguages.length} additional languages`,
                         "background: #FF9800; color: #ffffff; font-size: 12px;"
                     );
 
@@ -337,12 +337,12 @@ function patchSubtitleMenu() {
                     });
 
                     console.log(
-                        `%c[TizenTube Subtitle Localization] Added "Tizen Languages" section`,
+                        `%c[AixoTube Subtitle Localization] Added "Tizen Languages" section`,
                         "background: #FF9800; color: #ffffff; font-size: 12px;"
                     );
                 } else {
                     console.log(
-                        `%c[TizenTube Subtitle Localization] All languages already present in menu`,
+                        `%c[AixoTube Subtitle Localization] All languages already present in menu`,
                         "background: #4CAF50; color: #ffffff; font-size: 12px;"
                     );
                 }
@@ -354,7 +354,7 @@ function patchSubtitleMenu() {
     };
 
     yttvInstance.instance.resolveCommand.isPatchedBySubtitleLocalization = true;
-    console.log("TizenTube Subtitle Localization: Patch successful!");
+    console.log("AixoTube Subtitle Localization: Patch successful!");
     isPatched = true;
 }
 
@@ -376,5 +376,5 @@ if (document.readyState === "loading") {
 }
 
 console.log(
-    "TizenTube Subtitle Localization: Module loaded, waiting for YouTube TV..."
+    "AixoTube Subtitle Localization: Module loaded, waiting for YouTube TV..."
 );

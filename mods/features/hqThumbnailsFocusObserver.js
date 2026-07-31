@@ -56,11 +56,10 @@ function upgradeThumbnailQuality(element) {
     return;
   }
 
-  var queryArgs = currentUrl.split("?")[1] || "";
   element.setAttribute("data-hq-upgraded", videoId);
 
   var applyFinalQuality = function (qualityName) {
-    var finalUrl = "https://i.ytimg.com/vi/" + videoId + "/" + qualityName + (queryArgs ? "?" + queryArgs : "");
+    var finalUrl = "https://i.ytimg.com/vi/" + videoId + "/" + qualityName;
     if (isBackgroundImage) {
       element.style.backgroundImage = 'url("' + finalUrl + '")';
     } else {
@@ -74,7 +73,7 @@ function upgradeThumbnailQuality(element) {
     return;
   }
 
-  var maxresUrl = "https://i.ytimg.com/vi/" + videoId + "/maxresdefault.jpg" + (queryArgs ? "?" + queryArgs : "");
+  var maxresUrl = "https://i.ytimg.com/vi/" + videoId + "/maxresdefault.jpg";
 
   var tester = new Image();
   tester.onload = function () {
@@ -101,26 +100,56 @@ function initFocusObserver() {
     attributeFilter: ["class", "src", "srcset", "style"],
   };
 
-  var observer = new MutationObserver(function (mutations) {
+  var findTargetsAndUpgrade = function (container) {
+    if (!container) return;
+    var root = container.shadowRoot || container;
+
+    var img = root.querySelector ? root.querySelector("img") : null;
+    if (!img && root !== container && container.querySelector) {
+      img = container.querySelector("img");
+    }
+    if (img) upgradeThumbnailQuality(img);
+
+    var bgElements = [];
+    if (root.querySelectorAll) {
+      bgElements = root.querySelectorAll('[style*="background-image"]');
+    } else if (container.querySelectorAll) {
+      bgElements = container.querySelectorAll('[style*="background-image"]');
+    }
+    for (var b = 0; b < bgElements.length; b++) {
+      upgradeThumbnailQuality(bgElements[b]);
+    }
+
+    if (container.style && container.style.backgroundImage) {
+      upgradeThumbnailQuality(container);
+    }
+  };
+
+  var closestFocused = function (element) {
+    var current = element;
+    while (current) {
+      if (current.classList && current.classList.contains("zylon-focus")) {
+        return current;
+      }
+      if (current.closest) {
+        var viaClosest = current.closest(".zylon-focus");
+        if (viaClosest) return viaClosest;
+      }
+      var nextParent = current.parentElement;
+      if (!nextParent && current.getRootNode) {
+        var rootNode = current.getRootNode();
+        nextParent = (rootNode && rootNode.host) || null;
+      }
+      current = nextParent;
+    }
+    return null;
+  };
+
+  var processMutations = function (mutations) {
     try {
       for (var m = 0; m < mutations.length; m++) {
         var mutation = mutations[m];
         var element = mutation.target;
-
-        var findTargetsAndUpgrade = function (container) {
-          if (!container || !container.querySelector) return;
-          var img = container.querySelector("img");
-          if (img) upgradeThumbnailQuality(img);
-
-          var bgElements = container.querySelectorAll('[style*="background-image"]');
-          for (var b = 0; b < bgElements.length; b++) {
-            upgradeThumbnailQuality(bgElements[b]);
-          }
-
-          if (container.style && container.style.backgroundImage) {
-            upgradeThumbnailQuality(container);
-          }
-        };
 
         if (mutation.type === "attributes" && mutation.attributeName === "class") {
           if (element.classList && element.classList.contains("zylon-focus")) {
@@ -132,7 +161,7 @@ function initFocusObserver() {
           mutation.type === "attributes" &&
           (mutation.attributeName === "src" || mutation.attributeName === "srcset" || mutation.attributeName === "style")
         ) {
-          var focusedParent = element.closest ? element.closest(".zylon-focus") : null;
+          var focusedParent = closestFocused(element);
           if (focusedParent) {
             var lockedVideoId = element.getAttribute("data-hq-upgraded");
 
@@ -159,12 +188,7 @@ function initFocusObserver() {
             var node = mutation.addedNodes[n];
             if (node.nodeType !== 1) continue;
 
-            var focusedParentNode = null;
-            if (node.classList && node.classList.contains("zylon-focus")) {
-              focusedParentNode = node;
-            } else if (node.closest) {
-              focusedParentNode = node.closest(".zylon-focus");
-            }
+            var focusedParentNode = closestFocused(node);
 
             if (focusedParentNode) {
               findTargetsAndUpgrade(focusedParentNode);
@@ -180,6 +204,20 @@ function initFocusObserver() {
     } catch (err) {
       console.error("TT Error in hqObserver:", err);
     }
+  };
+
+  var pendingMutations = null;
+  var pendingFrame = null;
+
+  var observer = new MutationObserver(function (mutations) {
+    pendingMutations = pendingMutations ? pendingMutations.concat(mutations) : mutations;
+    if (pendingFrame) cancelAnimationFrame(pendingFrame);
+    pendingFrame = requestAnimationFrame(function () {
+      pendingFrame = null;
+      var batch = pendingMutations;
+      pendingMutations = null;
+      processMutations(batch);
+    });
   });
 
   var container = document.getElementById("container") || document.body;

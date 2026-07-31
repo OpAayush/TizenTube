@@ -1,24 +1,29 @@
-# TizenTube
+# AixoTube
 
-TizenTube is a TizenBrew module that enhances your favourite streaming websites viewing experience by removing ads and adding support for Sponsorblock.
+AixoTube is a TizenBrew module that enhances your favourite streaming websites viewing experience by removing ads and adding support for SponsorBlock.
 
-Looking for an app for Android TVs? Check out [TizenTube Cobalt](https://github.com/reisxd/TizenTubeCobalt). It offers everything TizenTube has for Android TVs. [Download the latest release here](https://github.com/reisxd/TizenTubeCobalt/releases/latest).
+## Credits
 
-[Discord Server Invite](https://discord.gg/m2P7v8Y2qR)
+- **Aayu5h** - Main Developer & Maintainer
+- **Reis Can (reisxd)** - Original Creator of TizenTube (upstream project)
 
-[Telegram Channel](https://t.me/tizentubeofficial)
-
-# How to install
+## How to Install
 
 1. Install TizenBrew from [here](https://github.com/reisxd/TizenBrew) and follow the instructions.
 
-2. TizenTube is installed to TizenBrew by default. It should be in the home screen. If not, add `@foxreis/tizentube` as a NPM module in TizenBrew module manager.
+2. Add `axotube` as an NPM module in the TizenBrew module manager.
 
-# Features
+## Features
 
 - Ad Blocker
 - [SponsorBlock](https://sponsor.ajay.app/) Support
 - Picture-in-Picture Mode
 - [DeArrow](https://dearrow.ajay.app/) Support
 - Customizable Themes (Custom Coloring)
-- More to come, if you [request](https://github.com/reisxd/TizenTube/issues/new) it!
+- Video Quality & Codec Preferences
+- Speed Controls
+- And more!
+
+## License
+
+This project is licensed under the GPL-3.0 License.

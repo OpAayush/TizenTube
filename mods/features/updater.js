@@ -1,9 +1,9 @@
-// TizenTube Cobalt Update Checker
+// AixoTube Cobalt Update Checker
 
 import { buttonItem, showModal, showToast, overlayPanelItemListRenderer } from '../ui/ytUI.js';
 import { configRead } from '../config.js';
 
-// If TizenTube is not running on Cobalt, do nothing
+// If AixoTube is not running on Cobalt, do nothing
 if (window.h5vcc && window.h5vcc.tizentube && configRead('enableUpdater')) {
     const currentEpoch = Math.floor(Date.now() / 1000);
     if (configRead('dontCheckUpdateUntil') > currentEpoch) {
@@ -50,7 +50,7 @@ function checkForUpdates(showNoUpdateToast) {
                 showModal(
                     {
                         title: 'Update Available',
-                        subtitle: `A new version of TizenTube Cobalt is available: ${latestVersion}\nCurrent version: ${currentAppVersion}\nRelease Date: ${new Date(releaseDate * 1000).toLocaleString()}\nRelease Notes:\n${release.body}`,
+                        subtitle: `A new version of AixoTube Cobalt is available: ${latestVersion}\nCurrent version: ${currentAppVersion}\nRelease Date: ${new Date(releaseDate * 1000).toLocaleString()}\nRelease Notes:\n${release.body}`,
                     },
                     overlayPanelItemListRenderer([
                         buttonItem(
@@ -92,15 +92,15 @@ function checkForUpdates(showNoUpdateToast) {
                     false
                 )
             } else {
-                console.info('You are using the latest version of TizenTube.');
+                console.info('You are using the latest version of AixoTube.');
                 if (showNoUpdateToast) {
-                    showToast('TizenTube is up to date', `You are using the latest version (${currentAppVersion}) of TizenTube Cobalt.`, null);
+                    showToast('AixoTube is up to date', `You are using the latest version (${currentAppVersion}) of AixoTube Cobalt.`, null);
                 }
             }
         })
         .catch(error => {
             console.error('Error fetching the latest release:', error);
-            showToast('TizenTube update check failed', 'Could not check for updates.', null);
+            showToast('AixoTube update check failed', 'Could not check for updates.', null);
         });
 }
 

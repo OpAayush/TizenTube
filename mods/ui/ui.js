@@ -93,7 +93,7 @@ function execute_once_dom_loaded() {
   try {
     // Create elements instead of using innerHTML to avoid TrustedHTML issues
     const h1 = document.createElement("h1");
-    h1.textContent = "TizenTube Theme Configuration";
+    h1.textContent = "AixoTube Theme Configuration";
 
     const label1 = document.createElement("label");
     label1.setAttribute("for", "__barColor");
@@ -113,7 +113,7 @@ function execute_once_dom_loaded() {
 
     const div = document.createElement("div");
     const small = document.createElement("small");
-    small.textContent = "Sponsor segments skipping - https://sponsor.ajay.app";
+    small.textContent = "Sponsor segments skipping powered by SponsorBlock";
     div.appendChild(small);
 
     uiContainer.appendChild(h1);

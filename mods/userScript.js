@@ -1,5 +1,5 @@
 /**
- * userScript.js – TizenTube entry point.
+ * userScript.js – AixoTube entry point.
  *
  * Import order matters for Tizen 4 (N5470 / Cobalt) compatibility:
  *  1. core-js/stable  – polyfills for ES built-ins not natively available

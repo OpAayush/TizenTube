@@ -1,4 +1,4 @@
-// Picture in Picture Mode for TizenTube
+// Picture in Picture Mode for AixoTube
 
 // At function call, get it from window
 const resolveCommand =
