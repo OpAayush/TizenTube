@@ -1,4 +1,12 @@
 const CONFIG_KEY = "ytaf-configuration";
+
+// Capture native JSON before the adblock.js patch replaces JSON.parse/stringify.
+// configRead/configWrite run inside the patched wrappers (every response parse),
+// so calling the wrapper from here would recurse infinitely on the populate path.
+const nativeJSONParse = JSON.parse;
+const nativeJSONStringify = JSON.stringify;
+const clone = (value) => nativeJSONParse(nativeJSONStringify(value));
+
 const defaultConfig = {
   enableAdBlock: true,
   enableSponsorBlock: true,
@@ -20,7 +28,7 @@ const defaultConfig = {
   focusContainerColor: "#0f0f0f",
   routeColor: "#0f0f0f",
   enableFixedUI: window.h5vcc && window.h5vcc.tizentube ? false : true,
-  enableHqThumbnails: false,
+  enableHqThumbnails: true,
   enableChapters: true,
   enableLongPress: true,
   enableShorts: true,
@@ -67,13 +75,13 @@ let localConfig;
 function initConfig() {
   try {
     if (window.localStorage && window.localStorage[CONFIG_KEY]) {
-      localConfig = JSON.parse(window.localStorage[CONFIG_KEY]);
+      localConfig = nativeJSONParse(window.localStorage[CONFIG_KEY]);
       return;
     }
   } catch (err) {
     console.warn("Config read failed:", err);
   }
-  localConfig = JSON.parse(JSON.stringify(defaultConfig));
+  localConfig = clone(defaultConfig);
 }
 
 initConfig();
@@ -81,7 +89,7 @@ initConfig();
 function tryPersistConfig() {
   try {
     if (!window.localStorage) return false;
-    const serialized = JSON.stringify(localConfig);
+    const serialized = nativeJSONStringify(localConfig);
     window.localStorage[CONFIG_KEY] = serialized;
     return true;
   } catch (err) {
@@ -89,7 +97,7 @@ function tryPersistConfig() {
       console.warn("localStorage quota exceeded, clearing old data");
       try {
         window.localStorage.clear();
-        window.localStorage[CONFIG_KEY] = JSON.stringify(localConfig);
+        window.localStorage[CONFIG_KEY] = nativeJSONStringify(localConfig);
         return true;
       } catch (e2) {
         console.error("Failed to persist config even after clearing:", e2);
@@ -103,13 +111,17 @@ function tryPersistConfig() {
 
 export function configRead(key) {
   if (localConfig[key] === undefined) {
+    if (defaultConfig[key] === undefined) {
+      console.warn("Unknown config key", key);
+      return undefined;
+    }
     console.warn(
       "Populating key",
       key,
       "with default value",
       defaultConfig[key],
     );
-    localConfig[key] = JSON.parse(JSON.stringify(defaultConfig[key]));
+    localConfig[key] = clone(defaultConfig[key]);
   }
   return localConfig[key];
 }

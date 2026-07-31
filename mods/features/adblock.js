@@ -46,8 +46,7 @@ JSON.parse = function () {
     const signinReminderEnabled = configRead('enableSigninReminder');
 
     if (r?.playbackContext?.contentPlaybackContext) {
-      // Handle inline playback without ads
-      console.log(r.playbackContext.contentPlaybackContext);
+      // Handled by the patched JSON.stringify below (isInlinePlaybackNoAd)
     }
 
     if (r.adPlacements && adBlockEnabled) {
@@ -279,12 +278,12 @@ JSON.parse = function () {
 // Fix playback issues
 const origStringify = JSON.stringify;
 JSON.stringify = function (value, replacer, space) {
-  if (value?.playbackContext?.contentPlaybackContext) {
-    const copiedValue = JSON.parse(origStringify(value));
-    if (!copiedValue.playbackContext.contentPlaybackContext.isInlinePlaybackNoAd) {
-      copiedValue.playbackContext.contentPlaybackContext.isInlinePlaybackNoAd = true;
-      return origStringify.call(this, copiedValue, replacer, space);
-    }
+  const playbackContext = value?.playbackContext?.contentPlaybackContext;
+  if (playbackContext && !playbackContext.isInlinePlaybackNoAd) {
+    // Mutate in place instead of the previous clone round-trip:
+    // avoids a full serialize + reparse of every player response.
+    playbackContext.isInlinePlaybackNoAd = true;
+    return origStringify.call(this, value, replacer, space);
   }
   return origStringify.call(this, value, replacer, space);
 };
@@ -302,40 +301,41 @@ for (const key in window._yttv) {
 }
 
 function processShelves(shelves, shouldAddPreviews = true) {
-  for (const shelve of shelves) {
-    if (shelve.shelfRenderer) {
-      if (!shelve.shelfRenderer.content?.horizontalListRenderer?.items)
-        continue;
-      deArrowify(shelve.shelfRenderer.content.horizontalListRenderer.items);
-      hqify(shelve.shelfRenderer.content.horizontalListRenderer.items);
-      addLongPress(shelve.shelfRenderer.content.horizontalListRenderer.items);
-      if (shouldAddPreviews) {
-        addPreviews(shelve.shelfRenderer.content.horizontalListRenderer.items);
-      }
-      shelve.shelfRenderer.content.horizontalListRenderer.items = hideVideo(
-        shelve.shelfRenderer.content.horizontalListRenderer.items,
-      );
-      if (!configRead("enableShorts")) {
-        if (
-          shelve.shelfRenderer.tvhtml5ShelfRendererType ===
-          "TVHTML5_SHELF_RENDERER_TYPE_SHORTS"
-        ) {
-          shelves.splice(shelves.indexOf(shelve), 1);
-          continue;
-        }
-        shelve.shelfRenderer.content.horizontalListRenderer.items =
-          shelve.shelfRenderer.content.horizontalListRenderer.items.filter(
-            (item) =>
-              item.tileRenderer?.tvhtml5ShelfRendererType !==
-              "TVHTML5_TILE_RENDERER_TYPE_SHORTS",
-          );
+  const removeShorts = !configRead("enableShorts");
+  for (let i = shelves.length - 1; i >= 0; i--) {
+    const shelve = shelves[i];
+    if (!shelve.shelfRenderer) continue;
+    if (!shelve.shelfRenderer.content?.horizontalListRenderer?.items) continue;
 
-        shelve.shelfRenderer.content.horizontalListRenderer.items =
-          shelve.shelfRenderer.content.horizontalListRenderer.items.filter(
-            (item) => !item.tileRenderer?.onSelectCommand?.reelWatchEndpoint,
-          );
-      }
+    // Skip processing entirely for shelves that will be removed
+    if (
+      removeShorts &&
+      shelve.shelfRenderer.tvhtml5ShelfRendererType ===
+        "TVHTML5_SHELF_RENDERER_TYPE_SHORTS"
+    ) {
+      shelves.splice(i, 1);
+      continue;
     }
+
+    const items = shelve.shelfRenderer.content.horizontalListRenderer.items;
+    deArrowify(items);
+    hqify(items);
+    addLongPress(items);
+    if (shouldAddPreviews) {
+      addPreviews(items);
+    }
+    if (removeShorts) {
+      shelve.shelfRenderer.content.horizontalListRenderer.items = items.filter(
+        (item) =>
+          !item.tileRenderer ||
+          (item.tileRenderer.tvhtml5ShelfRendererType !==
+            "TVHTML5_TILE_RENDERER_TYPE_SHORTS" &&
+            !item.tileRenderer.onSelectCommand?.reelWatchEndpoint),
+      );
+    }
+    shelve.shelfRenderer.content.horizontalListRenderer.items = hideVideo(
+      shelve.shelfRenderer.content.horizontalListRenderer.items,
+    );
   }
 }
 
@@ -344,9 +344,10 @@ function addPreviews(items) {
   for (const item of items) {
     if (item.tileRenderer) {
       const watchEndpoint = item.tileRenderer.onSelectCommand;
-      const copiedEndpoint = JSON.parse(JSON.stringify(watchEndpoint));
+      if (!watchEndpoint) continue;
       if (item.tileRenderer?.onFocusCommand?.playbackEndpoint) continue;
       if (item.tileRenderer?.onFocusCommand?.commandExecutorCommand) continue;
+      const copiedEndpoint = JSON.parse(JSON.stringify(watchEndpoint));
       item.tileRenderer.onFocusCommand = {
         startInlinePlaybackCommand: {
           blockAdoption: true,
@@ -363,83 +364,104 @@ function addPreviews(items) {
   }
 }
 
+// Session cache so repeated/re-rendered shelves don't re-request the API
+const deArrowCache = {};
+
 function deArrowify(items) {
-  for (const item of items) {
+  const deArrowEnabled = configRead("enableDeArrow");
+  const deArrowThumbnails = configRead("enableDeArrowThumbnails");
+  for (let i = items.length - 1; i >= 0; i--) {
+    const item = items[i];
     if (item.adSlotRenderer) {
-      const index = items.indexOf(item);
-      items.splice(index, 1);
+      items.splice(i, 1);
       continue;
     }
-    if (!item.tileRenderer) continue;
-    if (configRead("enableDeArrow")) {
-      const videoID = item.tileRenderer.contentId;
-      fetchWithTimeout(
-        `https://sponsor.ajay.app/api/branding?videoID=${videoID}`,
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          try {
-            if (data.titles && data.titles.length > 0) {
-              const mostVoted = data.titles.reduce((max, title) =>
-                max.votes > title.votes ? max : title,
-              );
-              if (item.tileRenderer?.metadata?.tileMetadataRenderer?.title) {
-                item.tileRenderer.metadata.tileMetadataRenderer.title.simpleText =
-                  mostVoted.title;
-              }
-            }
+    if (!item.tileRenderer || !deArrowEnabled) continue;
+    const videoID = item.tileRenderer.contentId;
+    if (!videoID || deArrowCache[videoID]) continue;
 
-            if (
-              data.thumbnails &&
-              data.thumbnails.length > 0 &&
-              configRead("enableDeArrowThumbnails")
-            ) {
-              const mostVotedThumbnail = data.thumbnails.reduce(
-                (max, thumbnail) =>
-                  max.votes > thumbnail.votes ? max : thumbnail,
-              );
-              if (
-                mostVotedThumbnail.timestamp &&
-                item.tileRenderer?.header?.tileHeaderRenderer?.thumbnail
-              ) {
-                item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails =
-                  [
-                    {
-                      url: `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoID}&time=${mostVotedThumbnail.timestamp}`,
-                      width: 1280,
-                      height: 640,
-                    },
-                  ];
-              }
+    const promise = fetchWithTimeout(
+      `https://sponsor.ajay.app/api/branding?videoID=${videoID}`,
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        try {
+          if (data.titles && data.titles.length > 0) {
+            const mostVoted = data.titles.reduce((max, title) =>
+              max.votes > title.votes ? max : title,
+            );
+            if (item.tileRenderer?.metadata?.tileMetadataRenderer?.title) {
+              item.tileRenderer.metadata.tileMetadataRenderer.title.simpleText =
+                mostVoted.title;
             }
-          } catch (e) {
-            console.warn("Error processing DeArrow data:", e);
           }
-        })
-        .catch(() => {});
-    }
+
+          if (
+            data.thumbnails &&
+            data.thumbnails.length > 0 &&
+            deArrowThumbnails
+          ) {
+            const mostVotedThumbnail = data.thumbnails.reduce(
+              (max, thumbnail) =>
+                max.votes > thumbnail.votes ? max : thumbnail,
+            );
+            if (
+              mostVotedThumbnail.timestamp &&
+              item.tileRenderer?.header?.tileHeaderRenderer?.thumbnail
+            ) {
+              item.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails =
+                [
+                  {
+                    url: `https://dearrow-thumb.ajay.app/api/v1/getThumbnail?videoID=${videoID}&time=${mostVotedThumbnail.timestamp}`,
+                    width: 1280,
+                    height: 640,
+                  },
+                ];
+            }
+          }
+        } catch (e) {
+          console.warn("Error processing DeArrow data:", e);
+        }
+      })
+      .catch(() => {});
+    deArrowCache[videoID] = promise;
   }
 }
 
+// Memoize the generated thumbnail array per video id so repeated shelves
+// and re-processed items don't rebuild/recursively re-walk the tile data
+const hqThumbnailsCache = {};
+
+function buildHqThumbnails(videoID) {
+  const thumbnails = [];
+  for (const filename of THUMBNAIL_URLS) {
+    thumbnails.push({
+      url: `https://i.ytimg.com/vi/${videoID}/${filename}`,
+      width: 1280,
+      height: 720,
+    });
+  }
+  return thumbnails;
+}
+
 function hqify(items) {
+  if (!configRead("enableHqThumbnails")) return;
   for (const item of items) {
     if (!item.tileRenderer) continue;
     if (item.tileRenderer.style !== "TILE_STYLE_YTLR_DEFAULT") continue;
-    if (!configRead("enableHqThumbnails")) continue;
 
     try {
       const videoID = item.tileRenderer.onSelectCommand?.watchEndpoint?.videoId;
       if (!videoID) continue;
 
-      const thumbnails = [];
+      // Skip tiles that were already upgraded with the cached array
+      const primaryThumbnails =
+        item.tileRenderer.header?.tileHeaderRenderer?.thumbnail?.thumbnails;
+      if (primaryThumbnails === hqThumbnailsCache[videoID]) continue;
 
-      for (const filename of THUMBNAIL_URLS) {
-        thumbnails.push({
-          url: `https://i.ytimg.com/vi/${videoID}/${filename}`,
-          width: 1280,
-          height: 720,
-        });
-      }
+      const thumbnails =
+        hqThumbnailsCache[videoID] || buildHqThumbnails(videoID);
+      hqThumbnailsCache[videoID] = thumbnails;
 
       // Set thumbnails in the primary location
       if (item.tileRenderer.header?.tileHeaderRenderer?.thumbnail?.thumbnails) {
@@ -487,12 +509,30 @@ function hqify(items) {
   }
 }
 
+// Build a minimal tile-shaped payload for the queue instead of deep-cloning
+// the whole tile into every long-press menu (halves response payload size)
+function makeQueuePayload(item) {
+  const src = item.tileRenderer;
+  const tile = {};
+  if (src.contentType !== undefined) tile.contentType = src.contentType;
+  if (src.style !== undefined) tile.style = src.style;
+  if (src.contentId !== undefined) tile.contentId = src.contentId;
+  if (src.trackingParams !== undefined) tile.trackingParams = src.trackingParams;
+  if (src.metadata !== undefined)
+    tile.metadata = JSON.parse(JSON.stringify(src.metadata));
+  if (src.header !== undefined)
+    tile.header = JSON.parse(JSON.stringify(src.header));
+  if (src.onSelectCommand !== undefined)
+    tile.onSelectCommand = JSON.parse(JSON.stringify(src.onSelectCommand));
+  return { tileRenderer: tile };
+}
+
 function addLongPress(items) {
   for (const item of items) {
     if (!item.tileRenderer) continue;
     if (item.tileRenderer.style !== 'TILE_STYLE_YTLR_DEFAULT') continue;
     if (item.tileRenderer.onLongPressCommand?.showMenuCommand?.menu?.menuRenderer?.items) {
-        const copiedItem = JSON.parse(JSON.stringify(item));
+        const copiedItem = makeQueuePayload(item);
         item.tileRenderer.onLongPressCommand.showMenuCommand.menu.menuRenderer.items.push(MenuServiceItemRenderer('Add to Queue', {
           clickTrackingParams: null,
           playlistEditEndpoint: {
@@ -508,7 +548,7 @@ function addLongPress(items) {
     if (!item.tileRenderer?.metadata?.tileMetadataRenderer) continue;
     if (!item.tileRenderer?.header?.tileHeaderRenderer?.thumbnail?.thumbnails) continue;
     if (!item.tileRenderer.onSelectCommand?.watchEndpoint) continue;
-    const copiedItem = JSON.parse(JSON.stringify(item));
+    const copiedItem = makeQueuePayload(item);
     const subtitleNode = copiedItem.tileRenderer.metadata.tileMetadataRenderer.lines?.[0]?.lineRenderer?.items?.[0]?.lineItemRenderer?.text;
     if (!subtitleNode) continue;
     const subtitle = subtitleNode;
@@ -525,6 +565,22 @@ function addLongPress(items) {
 }
 
 function hideVideo(items) {
+  const pages = configRead("hideWatchedVideosPages");
+  if (!pages || !pages.length) return items;
+  const threshold = configRead("hideWatchedVideosThreshold");
+  const hash = location.hash.substring(1);
+  const pageName =
+    hash === "/"
+      ? "home"
+      : hash.startsWith("/search")
+        ? "search"
+        : (hash
+            .split("?")[1]
+            ?.split("&")[0]
+            ?.split("=")[1]
+            ?.replace("FE", "")
+            ?.replace("topics_", "") ?? "");
+  if (!pages.includes(pageName)) return items;
   return items.filter((item) => {
     if (!item.tileRenderer) return true;
     const progressBar =
@@ -532,23 +588,7 @@ function hideVideo(items) {
         (overlay) => overlay.thumbnailOverlayResumePlaybackRenderer,
       )?.thumbnailOverlayResumePlaybackRenderer;
     if (!progressBar) return true;
-    const pages = configRead("hideWatchedVideosPages");
-    if (!pages || !pages.length) return true;
-    const hash = location.hash.substring(1);
-    const pageName =
-      hash === "/"
-        ? "home"
-        : hash.startsWith("/search")
-          ? "search"
-          : (hash
-              .split("?")[1]
-              ?.split("&")[0]
-              ?.split("=")[1]
-              ?.replace("FE", "")
-              ?.replace("topics_", "") ?? "");
-    if (!pages.includes(pageName)) return true;
-
     const percentWatched = progressBar.percentDurationWatched || 0;
-    return percentWatched <= configRead("hideWatchedVideosThreshold");
+    return percentWatched <= threshold;
   });
 }

@@ -1,7 +1,7 @@
 // High-Quality Thumbnails for Focused Items
 // Fixes issue where focused thumbnails revert to default quality
 
-import { configRead } from "../config.js";
+import { configRead, configChangeEmitter } from "../config.js";
 
 var THUMBNAIL_URLS = [
   "maxresdefault.jpg",
@@ -20,10 +20,11 @@ function extractVideoIdFromThumbnailUrl(url) {
 }
 
 var qualityCache = {};
+var pendingTesters = {};
 
 function upgradeThumbnailQuality(element) {
   if (!configRead("enableHqThumbnails")) return;
-  if (!element) return;
+  if (!element || element.isConnected === false) return;
 
   var currentUrl = "";
   var isBackgroundImage = false;
@@ -59,6 +60,7 @@ function upgradeThumbnailQuality(element) {
   element.setAttribute("data-hq-upgraded", videoId);
 
   var applyFinalQuality = function (qualityName) {
+    if (!element || element.isConnected === false) return;
     var finalUrl = "https://i.ytimg.com/vi/" + videoId + "/" + qualityName;
     if (isBackgroundImage) {
       element.style.backgroundImage = 'url("' + finalUrl + '")';
@@ -73,10 +75,15 @@ function upgradeThumbnailQuality(element) {
     return;
   }
 
+  // Avoid firing duplicate quality probes for the same video
+  if (pendingTesters[videoId]) return;
+  pendingTesters[videoId] = true;
+
   var maxresUrl = "https://i.ytimg.com/vi/" + videoId + "/maxresdefault.jpg";
 
   var tester = new Image();
   tester.onload = function () {
+    pendingTesters[videoId] = false;
     if (this.naturalWidth === 120 && this.naturalHeight === 90) {
       qualityCache[videoId] = "hqdefault.jpg";
       applyFinalQuality("hqdefault.jpg");
@@ -86,6 +93,7 @@ function upgradeThumbnailQuality(element) {
     }
   };
   tester.onerror = function () {
+    pendingTesters[videoId] = false;
     qualityCache[videoId] = "hqdefault.jpg";
     applyFinalQuality("hqdefault.jpg");
   };
@@ -147,6 +155,7 @@ function initFocusObserver() {
 
   var processMutations = function (mutations) {
     try {
+      var focusedEl = null;
       for (var m = 0; m < mutations.length; m++) {
         var mutation = mutations[m];
         var element = mutation.target;
@@ -155,12 +164,29 @@ function initFocusObserver() {
           if (element.classList && element.classList.contains("zylon-focus")) {
             findTargetsAndUpgrade(element);
           }
+          continue;
         }
 
-        if (
-          mutation.type === "attributes" &&
-          (mutation.attributeName === "src" || mutation.attributeName === "srcset" || mutation.attributeName === "style")
-        ) {
+        if (mutation.type === "attributes") {
+          // Cheap pre-filter before the expensive ancestor walk: only react
+          // to thumbnail-related changes (scroll style churn is ignored)
+          if (
+            mutation.attributeName === "src" ||
+            mutation.attributeName === "srcset"
+          ) {
+            if (element.tagName !== "IMG") continue;
+            var attr =
+              mutation.attributeName === "src"
+                ? element.getAttribute("src")
+                : element.getAttribute("srcset");
+            if (!attr || attr.indexOf("i.ytimg.com/vi/") === -1) continue;
+          } else if (mutation.attributeName === "style") {
+            var bg = element.style && element.style.backgroundImage;
+            if (!bg || bg.indexOf("i.ytimg.com/vi/") === -1) continue;
+          } else {
+            continue;
+          }
+
           var focusedParent = closestFocused(element);
           if (focusedParent) {
             var lockedVideoId = element.getAttribute("data-hq-upgraded");
@@ -181,18 +207,29 @@ function initFocusObserver() {
             element.removeAttribute("data-hq-upgraded");
             upgradeThumbnailQuality(element);
           }
+          continue;
         }
 
         if (mutation.type === "childList") {
+          // Resolve the focused element once per batch instead of walking
+          // ancestors for every added node
+          if (!focusedEl) focusedEl = document.querySelector(".zylon-focus");
+          var upgradedOnce = false;
           for (var n = 0; n < mutation.addedNodes.length; n++) {
             var node = mutation.addedNodes[n];
             if (node.nodeType !== 1) continue;
 
-            var focusedParentNode = closestFocused(node);
-
-            if (focusedParentNode) {
-              findTargetsAndUpgrade(focusedParentNode);
-            } else if (node.querySelectorAll) {
+            if (
+              focusedEl &&
+              (focusedEl === node ||
+                focusedEl.contains(node) ||
+                node.contains(focusedEl))
+            ) {
+              if (!upgradedOnce) {
+                findTargetsAndUpgrade(focusedEl);
+                upgradedOnce = true;
+              }
+            } else if (!focusedEl && node.querySelectorAll) {
               var focusedChildren = node.querySelectorAll(".zylon-focus");
               for (var c = 0; c < focusedChildren.length; c++) {
                 findTargetsAndUpgrade(focusedChildren[c]);
@@ -206,24 +243,48 @@ function initFocusObserver() {
     }
   };
 
+  var observer = null;
   var pendingMutations = null;
   var pendingFrame = null;
 
-  var observer = new MutationObserver(function (mutations) {
-    pendingMutations = pendingMutations ? pendingMutations.concat(mutations) : mutations;
-    if (pendingFrame) cancelAnimationFrame(pendingFrame);
-    pendingFrame = requestAnimationFrame(function () {
-      pendingFrame = null;
-      var batch = pendingMutations;
-      pendingMutations = null;
-      processMutations(batch);
+  var startObserver = function () {
+    if (observer) return;
+    var container = document.getElementById("container") || document.body;
+    if (!container) return;
+    observer = new MutationObserver(function (mutations) {
+      pendingMutations = pendingMutations ? pendingMutations.concat(mutations) : mutations;
+      if (pendingFrame) cancelAnimationFrame(pendingFrame);
+      pendingFrame = requestAnimationFrame(function () {
+        pendingFrame = null;
+        var batch = pendingMutations;
+        pendingMutations = null;
+        processMutations(batch);
+      });
     });
+    observer.observe(container, observerConfig);
+  };
+
+  var stopObserver = function () {
+    if (!observer) return;
+    observer.disconnect();
+    observer = null;
+  };
+
+  var syncWithConfig = function () {
+    if (configRead("enableHqThumbnails")) {
+      startObserver();
+    } else {
+      stopObserver();
+    }
+  };
+
+  configChangeEmitter.addEventListener("configChange", function (event) {
+    if (event.detail && event.detail.key === "enableHqThumbnails") {
+      syncWithConfig();
+    }
   });
 
-  var container = document.getElementById("container") || document.body;
-  observer.observe(container, observerConfig);
-
-  return observer;
+  syncWithConfig();
 }
 
 if (document.readyState === "loading") {
