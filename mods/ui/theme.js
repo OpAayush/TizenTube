@@ -9,8 +9,8 @@ let css = '';
 function updateStyle() {
   css = `
     /* ytaf-theme-start */
-    ytlr-guide-response yt-focus-container {
-        background-color: ${configRead('focusContainerColor')};
+    ytlr-guide-response {
+        background-color: ${configRead('focusContainerColor')} !important;
     }
 
     #container {
