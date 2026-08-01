@@ -64,18 +64,17 @@ export function patchResolveCommand() {
                 configWrite(settingData.clientSettingEnum.item, arr);
               } else if (settingData.clientSettingEnum.item === "themePreset") {
                 const preset = {
-                  default: ["#0f0f0f", "#0f0f0f"],
-                  black: ["#000000", "#000000"],
-                  darkGray: ["#1c1a1a", "#121212"],
-                  charcoal: ["#121212", "#121212"],
-                  navy: ["#0d1b2a", "#121212"],
-                  darkRed: ["#3b0505", "#121212"],
-                  darkGreen: ["#052e1b", "#121212"],
-                  darkPurple: ["#1a1025", "#121212"],
+                  default: "#0f0f0f",
+                  black: "#000000",
+                  darkGray: "#121212",
+                  charcoal: "#121212",
+                  navy: "#121212",
+                  darkRed: "#121212",
+                  darkGreen: "#121212",
+                  darkPurple: "#121212",
                 }[value];
                 if (preset) {
-                  configWrite("focusContainerColor", preset[0]);
-                  configWrite("routeColor", preset[1]);
+                  configWrite("routeColor", preset);
                   configWrite("themePreset", value);
                 }
               } else configWrite(settingData.clientSettingEnum.item, value);

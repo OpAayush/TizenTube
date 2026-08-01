@@ -1,58 +1,62 @@
 // Self-contained HTML config editor served by the Tizen service app on port 8085.
-// No external CDNs — must work offline on any browser pointed at the TV's IP.
+// Styling is pulled from Pico.css via CDN to keep the bundle size small —
+// the page only needs a <link> tag, not a bundled stylesheet.
 module.exports.webConfigPage = `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AixoTube Web Config</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
 <style>
-  * { box-sizing: border-box; }
-  body { margin: 0; font-family: "YouTube Sans", Roboto, Arial, sans-serif; background: #181818; color: #eee; }
-  header { padding: 18px 24px; background: #212121; border-bottom: 1px solid #333; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  header h1 { font-size: 20px; margin: 0; flex: 1; }
-  .badge { font-size: 13px; color: #aaa; }
-  .status { font-size: 13px; padding: 4px 10px; border-radius: 12px; }
-  .status.ok { background: #1b5e20; color: #c8e6c9; }
-  .status.err { background: #7f1010; color: #ffcdd2; }
-  .actions { display: flex; gap: 8px; padding: 14px 24px; flex-wrap: wrap; }
-  .actions input[type=text] { background: #212121; border: 1px solid #444; color: #eee; padding: 8px 12px; border-radius: 4px; min-width: 260px; }
-  button { background: #cc0000; color: #fff; border: 0; padding: 9px 18px; border-radius: 4px; cursor: pointer; font-size: 14px; }
-  button.ghost { background: #333; }
-  button:hover { filter: brightness(1.15); }
-  main { padding: 8px 24px 40px; max-width: 860px; }
-  .row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-bottom: 1px solid #2a2a2a; }
-  .row:nth-child(even) { background: #1e1e1e; }
-  .row .key { flex: 1; font-size: 13px; color: #ddd; word-break: break-word; }
-  .row .ctrl { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; }
-  input[type=color] { width: 44px; height: 30px; border: 1px solid #555; background: transparent; cursor: pointer; padding: 0; }
-  input[type=number], select, input[type=text] { background: #212121; border: 1px solid #444; color: #eee; padding: 6px 8px; border-radius: 4px; font-size: 13px; }
+  :root { --pico-font-family: "YouTube Sans", Roboto, Arial, sans-serif; }
+  body > main { max-width: 980px; }
+  header.app { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 18px 24px; border-bottom: 1px solid var(--pico-muted-border-color); position: sticky; top: 0; background: var(--pico-background-color); z-index: 10; }
+  header.app h1 { font-size: 20px; margin: 0; }
+  .badge { font-size: 13px; color: var(--pico-muted-color); }
+  .status { font-size: 13px; padding: 4px 10px; border-radius: 999px; }
+  .status.ok { background: var(--pico-ins-color); color: var(--pico-background-color); }
+  .status.err { background: var(--pico-del-color); color: var(--pico-background-color); }
+  .actions { display: flex; gap: 10px; padding: 14px 24px; flex-wrap: wrap; align-items: center; }
+  .actions input[type=search] { flex: 1; min-width: 220px; margin: 0; }
+  .actions button { margin: 0; }
+  .hint { font-size: 12px; color: var(--pico-muted-color); padding: 0 24px; }
+  main.list { padding: 8px 24px 40px; }
+  .group-title { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--pico-muted-color); margin: 18px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--pico-muted-border-color); }
+  .row { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-bottom: 1px solid var(--pico-muted-border-color); border-radius: var(--pico-border-radius); }
+  .row:hover { background: var(--pico-muted-border-color); }
+  .row .key { flex: 1; font-size: 13px; word-break: break-word; }
+  .row .ctrl { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  input[type=color] { width: 44px; height: 32px; border: 1px solid var(--pico-muted-border-color); background: transparent; cursor: pointer; padding: 0; }
+  input[type=number], select, input[type=text], input[type=url], input[type=search] { padding: 6px 8px; font-size: 13px; }
   select { min-width: 150px; }
   input[type=range] { width: 160px; }
   .presets { display: flex; gap: 4px; }
-  .presets button { width: 22px; height: 22px; border-radius: 50%; padding: 0; border: 2px solid #555; }
-  .presets button.sel { border-color: #fff; }
-  textarea { background: #212121; border: 1px solid #444; color: #eee; padding: 6px 8px; border-radius: 4px; width: 100%; font-family: monospace; font-size: 12px; min-height: 48px; }
-  .hint { font-size: 12px; color: #888; padding: 0 24px; }
-  .toast-save { position: fixed; right: 20px; bottom: 20px; background: #1b5e20; color: #c8e6c9; padding: 10px 16px; border-radius: 4px; font-size: 14px; opacity: 0; transition: opacity .25s; }
+  .presets button { width: 22px; height: 22px; border-radius: 50%; padding: 0; border: 2px solid var(--pico-muted-border-color); cursor: pointer; }
+  .presets button.sel { border-color: var(--pico-primary); }
+  textarea { padding: 6px 8px; border-radius: var(--pico-border-radius); width: 100%; font-family: monospace; font-size: 12px; min-height: 48px; }
+  .toast-save { position: fixed; right: 20px; bottom: 20px; background: var(--pico-ins-color); color: var(--pico-background-color); padding: 10px 16px; border-radius: var(--pico-border-radius); font-size: 14px; opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 20; }
   .toast-save.show { opacity: 1; }
-  .empty { padding: 30px 24px; color: #999; font-size: 14px; }
+  .empty { padding: 30px 24px; color: var(--pico-muted-color); font-size: 14px; }
+  .bg-preview { width: 64px; height: 36px; object-fit: cover; border-radius: 4px; border: 1px solid var(--pico-muted-border-color); background: var(--pico-muted-border-color); }
 </style>
 </head>
 <body>
-<header>
+<header class="app">
   <h1>AixoTube Web Config</h1>
-  <span class="badge" id="revLabel">revision -</span>
-  <span class="status" id="status">connecting...</span>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <span class="badge" id="revLabel">revision -</span>
+    <span class="status" id="status">connecting...</span>
+  </div>
 </header>
 <div class="actions">
-  <input type="text" id="filter" placeholder="Filter keys..." />
+  <input type="search" id="filter" placeholder="Filter keys..." />
   <button id="btnSave">Save to TV</button>
-  <button class="ghost" id="btnRefresh">Reload from TV</button>
-  <button class="ghost" id="btnDefaults">Reset to defaults</button>
+  <button class="secondary outline" id="btnRefresh">Reload from TV</button>
+  <button class="secondary outline" id="btnDefaults">Reset to defaults</button>
 </div>
 <p class="hint">Edits are stored on the TV service and applied live by the running app (syncs every few seconds).</p>
-<main id="main"></main>
+<main class="list" id="main"></main>
 <div class="toast-save" id="toast">Saved</div>
 
 <script>
@@ -75,8 +79,8 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     preferredVideoQuality: "auto",
     enableDeArrow: true,
     enableDeArrowThumbnails: false,
-    focusContainerColor: "#0f0f0f",
     routeColor: "#0f0f0f",
+    routeBackgroundUrl: "",
     themePreset: "default",
     enableHqThumbnails: true,
     enableLongPress: true,
@@ -121,7 +125,8 @@ module.exports.webConfigPage = `<!DOCTYPE html>
   var ENUMS = {
     preferredVideoQuality: ["auto", "2160p", "1440p", "1080p", "720p", "480p", "360p", "240p", "144p"],
     videoPreferredCodec: ["any", "vp9", "av01", "avc1"],
-    themePreset: ["default", "black", "darkGray", "charcoal", "navy", "darkRed", "darkGreen", "darkPurple"],    speedSettingsIncrement: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
+    themePreset: ["default", "black", "darkGray", "charcoal", "navy", "darkRed", "darkGreen", "darkPurple"],
+    speedSettingsIncrement: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
   };
   var RANGES = {
     hideWatchedVideosThreshold: [0, 100, 1],
@@ -130,10 +135,40 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     autoFrameRatePauseVideoFor: [0, 120, 1],
     videoSpeed: [0.25, 2, 0.25]
   };
-  var COLORS = ["focusContainerColor", "routeColor"];
+  var COLORS = ["routeColor"];
   var ARRAYS = ["sponsorBlockManualSkips", "hideWatchedVideosPages", "disabledSidebarContents"];
   var JSONS = ["launchToOnStartup"];
+  var URLS = ["routeBackgroundUrl"];
   var COLOR_PRESETS = ["#0f0f0f", "#000000", "#1c1a1a", "#121212", "#0d1b2a", "#3b0505", "#052e1b", "#1a1025"];
+  var GROUPS = {
+    enableAdBlock: "AdBlock",
+    enableSponsorBlock: "SponsorBlock", enableSponsorBlockToasts: "SponsorBlock",
+    sponsorBlockManualSkips: "SponsorBlock", enableSponsorBlockSponsor: "SponsorBlock",
+    enableSponsorBlockIntro: "SponsorBlock", enableSponsorBlockOutro: "SponsorBlock",
+    enableSponsorBlockInteraction: "SponsorBlock", enableSponsorBlockSelfPromo: "SponsorBlock",
+    enableSponsorBlockPreview: "SponsorBlock", enableSponsorBlockMusicOfftopic: "SponsorBlock",
+    enableSponsorBlockFiller: "SponsorBlock", enableSponsorBlockHighlight: "SponsorBlock",
+    enableDeArrow: "Player", enableDeArrowThumbnails: "Player", videoSpeed: "Player",
+    preferredVideoQuality: "Player", videoPreferredCodec: "Player",
+    enablePreviousNextButtons: "Player", enableSuperThanksButton: "Player",
+    enableSpeedControlsButton: "Player", enablePatchingVideoPlayer: "Player",
+    enableMPButton: "Player", enableSwapMPWithPIP: "Player", enablePreviews: "Player",
+    enablePip: "Player", autoFrameRate: "Player", autoFrameRatePauseVideoFor: "Player",
+    routeColor: "Theme", routeBackgroundUrl: "Theme", themePreset: "Theme",
+    enableHideWatchedVideos: "Interface", hideWatchedVideosThreshold: "Interface",
+    hideWatchedVideosPages: "Interface", enableHideEndScreenCards: "Interface",
+    enableYouThereRenderer: "Interface", enableScreenDimming: "Interface",
+    dimmingTimeout: "Interface", dimmingOpacity: "Interface",
+    enablePaidPromotionOverlay: "Interface", enablePremiumLogo: "Interface",
+    enableHqThumbnails: "Interface", enableLongPress: "Interface", enableShorts: "Interface",
+    enableShowUserLanguage: "Interface", enableShowOtherLanguages: "Interface",
+    showWelcomeToast: "Interface", enableWhoIsWatchingMenu: "Interface",
+    permanentlyEnableWhoIsWatchingMenu: "Interface", enableWhosWatchingMenuOnAppExit: "Interface",
+    launchToOnStartup: "Interface", reloadHomeOnStartup: "Interface",
+    disabledSidebarContents: "Interface", disableChannelsOnSidebar: "Interface",
+    dontCheckUpdateUntil: "System", enableUpdater: "System",
+    enableSigninReminder: "System", sortSubscriptionsByAlphabet: "System"
+  };
   var state = {};
   var revision = 0;
 
@@ -178,13 +213,22 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     });
   }
 
+  function groupOf(k) { return GROUPS[k] || "General"; }
+
   function render() {
     var q = filterEl.value.toLowerCase();
     var html = "";
+    var currentGroup = "";
     Object.keys(DEFAULTS).forEach(function (k) {
       if (q && k.toLowerCase().indexOf(q) === -1) return;
+      var g = groupOf(k);
+      if (g !== currentGroup) {
+        html += '<div class="group-title">' + g + "</div>";
+        currentGroup = g;
+      }
       html += '<div class="row" data-key="' + k + '"><div class="key">' + k + '</div><div class="ctrl">' + controlHtml(k) + '</div></div>';
     });
+    if (!html) html = '<div class="empty">No settings match "' + q + '"</div>';
     main.innerHTML = html;
     Object.keys(DEFAULTS).forEach(function (k) {
       if (q && k.toLowerCase().indexOf(q) === -1) return;
@@ -200,6 +244,10 @@ module.exports.webConfigPage = `<!DOCTYPE html>
         presets += '<button type="button" class="c' + (c === v ? " sel" : "") + '" data-color="' + c + '" style="background:' + c + '"></button>';
       });
       return '<input type="color" data-color-input value="' + v + '" />' + presets;
+    }
+    if (URLS.indexOf(k) !== -1) {
+      var preview = v ? '<img class="bg-preview" data-bg-preview src="' + v + '" alt="" />' : "";
+      return '<input type="url" data-url value="' + v + '" placeholder="https://example.com/background.jpg" />' + preview;
     }
     if (ENUMS[k]) {
       var opts = "";
@@ -248,24 +296,39 @@ module.exports.webConfigPage = `<!DOCTYPE html>
           });
         });
       });
+    } else if (URLS.indexOf(k) !== -1) {
+      var urlInput = row.querySelector("[data-url]");
+      var preview = row.querySelector("[data-bg-preview]");
+      function updatePreview() {
+        if (!preview) return;
+        if (state[k]) {
+          preview.src = state[k];
+          preview.style.display = "";
+        } else {
+          preview.style.display = "none";
+        }
+      }
+      urlInput.addEventListener("change", function () {
+        state[k] = urlInput.value.trim();
+        updatePreview();
+      });
     } else if (ENUMS[k]) {
       row.querySelector("[data-enum]").addEventListener("change", function (e) {
         var raw = e.target.value;
         state[k] = typeof DEFAULTS[k] === "number" ? Number(raw) : raw;
         if (k === "themePreset") {
           var preset = {
-            default: ["#0f0f0f", "#0f0f0f"],
-            black: ["#000000", "#000000"],
-            darkGray: ["#1c1a1a", "#121212"],
-            charcoal: ["#121212", "#121212"],
-            navy: ["#0d1b2a", "#121212"],
-            darkRed: ["#3b0505", "#121212"],
-            darkGreen: ["#052e1b", "#121212"],
-            darkPurple: ["#1a1025", "#121212"]
+            default: "#0f0f0f",
+            black: "#000000",
+            darkGray: "#121212",
+            charcoal: "#121212",
+            navy: "#121212",
+            darkRed: "#121212",
+            darkGreen: "#121212",
+            darkPurple: "#121212"
           }[raw];
           if (preset) {
-            state.focusContainerColor = preset[0];
-            state.routeColor = preset[1];
+            state.routeColor = preset;
           }
         }
       });

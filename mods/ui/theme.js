@@ -7,14 +7,19 @@ const style = document.createElement('style');
 let css = '';
 
 function updateStyle() {
+  const bgUrl = configRead('routeBackgroundUrl');
+  const bg = bgUrl
+    ? `
+        background-image: url("${bgUrl}") !important;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;`
+    : `
+        background-color: ${configRead('routeColor')} !important;`;
   css = `
     /* ytaf-theme-start */
-    ytlr-guide-response {
-        background-color: ${configRead('focusContainerColor')} !important;
-    }
-
     #container {
-        background-color: ${configRead('routeColor')} !important;
+        ${bg}
     }
     /* ytaf-theme-end */
 `;

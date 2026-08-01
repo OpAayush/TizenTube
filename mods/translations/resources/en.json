@@ -68,9 +68,6 @@
                         "title": "Presets",
                         "menuSubtitle": "Apply a pre-made color combination"
                     },
-                    "focusColor": {
-                        "title": "Navigation Bar Color"
-                    },
                     "routeColor": {
                         "title": "Main Content Color"
                     },
