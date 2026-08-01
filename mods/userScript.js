@@ -1,5 +1,5 @@
 /**
- * userScript.js – AixoTube entry point.
+ * userScript.js – axotube entry point.
  *
  * Import order matters for Tizen 4 (N5470 / Cobalt) compatibility:
  *  1. polyfills.js    – browser-API + ES-builtin polyfills for Chromium 47
@@ -10,34 +10,34 @@
  */
 
 // ── 1. Browser-API + ES-builtin polyfills (EventTarget ctor, AbortController, …) ─
-import './polyfills.js';
+import "./polyfills.js";
 
 // ── 2. Fetch polyfill ─────────────────────────────────────────────────────────
-import 'whatwg-fetch';
+import "whatwg-fetch";
 
 // ── 3. Boot loader (hold native splash until TizenTube is ready) ──────────────
-import './ui/bootLoader.js';
+import "./ui/bootLoader.js";
 
-// ── 5. Application modules ────────────────────────────────────────────────────
-import './features/userAgentSpoofing.js';
-import './translations/index.js';
-import './domrect-polyfill';
+// ── 4. Application modules ────────────────────────────────────────────────────
+import "./features/userAgentSpoofing.js";
+import "./translations/index.js";
+import "./domrect-polyfill";
 
-import './features/adblock.js';
-import './features/hqThumbnailsFocusObserver.js';
-import './features/sponsorblock.js';
-import './ui/ui.js';
-import './ui/speedUI.js';
-import './ui/theme.js';
-import './ui/settings.js';
-import './ui/disableWhosWatching.js';
-import './features/moreSubtitles.js';
-import './features/updater.js';
-import './features/pictureInPicture.js';
-import './features/preferredVideoQuality.js';
-import './features/videoQueuing.js';
-import './features/enableFeatures.js';
-import './ui/customUI.js';
-import './ui/customGuideAction.js';
-import './features/autoFrameRate.js';
-import './features/premiumLogo.js';
+import "./features/adblock.js";
+import "./features/hqThumbnailsFocusObserver.js";
+import "./features/sponsorblock.js";
+import "./ui/ui.js";
+import "./ui/speedUI.js";
+import "./ui/theme.js";
+import "./ui/settings.js";
+import "./ui/disableWhosWatching.js";
+import "./features/moreSubtitles.js";
+import "./features/updater.js";
+import "./features/pictureInPicture.js";
+import "./features/preferredVideoQuality.js";
+import "./features/videoQueuing.js";
+import "./features/enableFeatures.js";
+import "./ui/customUI.js";
+import "./ui/customGuideAction.js";
+import "./features/autoFrameRate.js";
+import "./features/premiumLogo.js";

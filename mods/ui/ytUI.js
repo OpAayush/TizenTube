@@ -10,26 +10,33 @@ function dispatchCommand(cmd, _) {
   }
 }
 function showToast(title, subtitle, thumbnails) {
+  const overlayToastRenderer = {
+    title: {
+      simpleText: title,
+    },
+    subtitle: {
+      simpleText: subtitle,
+    },
+    accessibilityData: {
+      accessibilityData: {
+        label: subtitle ? `${title} - ${subtitle}` : title,
+      },
+    },
+    trackingParams: "CAEQlYkGGhMI",
+  };
+
+  if (thumbnails && thumbnails.length > 0) {
+    overlayToastRenderer.image = { thumbnails };
+  }
+
   const toastCmd = {
     openPopupAction: {
       popupType: "TOAST",
       popup: {
-        overlayToastRenderer: {
-          title: {
-            simpleText: title,
-          },
-          subtitle: {
-            simpleText: subtitle,
-          },
-        },
+        overlayToastRenderer,
       },
     },
   };
-
-  if (thumbnails) {
-    toastCmd.openPopupAction.popup.overlayToastRenderer.image.thumbnails =
-      thumbnails;
-  }
   dispatchCommand(toastCmd);
 }
 

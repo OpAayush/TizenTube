@@ -1,4 +1,4 @@
-# TizenTube / AixoTube — Research & Future Plans
+# TizenTube / axotube — Research & Future Plans
 
 > Working repo: `E:\Aayush\COMPUTER\TO DO Projects\TizenTube` (fork of TizenTube, target: `https://github.com/OpAayush/axotube`)
 > Source in `mods/`, build output `dist/userScript.js` (single minified file, built with `npm run build` in `mods/`).
@@ -11,6 +11,7 @@
 Goal: improve script loading time + reduce size. Result: **dist/userScript.js 734,360 → 525,396 bytes (−28.5%, ~209KB saved)**. Build time dropped from ~21s → 9.5s.
 
 ### What was done
+
 - Removed `import 'core-js/stable'` from `mods/userScript.js` (was ~209KB of blanket polyfills; Tizen 4's Chromium 47 already natively has Array.includes/find/findIndex, Symbol, Map/Set, Object.assign, Promise, String.includes, etc.).
 - Hand-wrote tiny ES5 polyfills in `mods/polyfills.js` for the actual remaining Chrome-47 gaps:
   - `Object.entries` / `Object.values` (used by moreSubtitles.js, enableFeatures.js, pictureInPicture.js, preferredVideoQuality.js).
@@ -21,14 +22,17 @@ Goal: improve script loading time + reduce size. Result: **dist/userScript.js 73
 - `core-js/web/url` was measured but REJECTED (it drags in ~52KB of URL+URLSearchParams machinery; hand-written approaches are far smaller).
 
 ### Verified
+
 - Smoke test (`node smoke-test.js` at repo root): all 8 assertions PASS after the change.
 - Bundle syntax OK (`new Function` check).
 - One harness gotcha: core-js/stable was defining `self` as a side effect; the smoke test now sets `global.self = globalThis` (line 54). On real Cobalt `self` is a native browser global so no runtime impact.
 
 ### Size measurement infra
+
 Probe scripts live in `C:\Users\Asus\AppData\Local\Temp\opencode\probe-sizes.js` (measures bundle sizes by writing a temp `_size_probe.js` input and using `rollup.rollup` + `generate`), `probe-check.js`, `probe-edit.js`. Key measured numbers: core-js/stable alone 209,087 B; polyfills.js alone 4,984 B; whatwg-fetch alone 9,945 B; targeted core-js set 68,561 B; LEAN core-js with web/url 67,606 B; i18next+translations ≈ 182 KB; ui.js tree ≈ 124 KB; remaining app modules ≈ 192 KB.
 
 ### Remaining size targets (not yet done)
+
 - translations + i18next ≈ 182 KB (biggest remaining chunk; i18next dist/cjs/i18next.js is 81,740 B, uses only 1x Array.includes + 1 for-of so it's Chrome-47-safe; translations/language-names.js etc.)
 - ui.css (46,177 B raw, inlined via string plugin) and the ui.js tree ≈ 124 KB.
 
@@ -49,7 +53,9 @@ Audit of hot-path code (`mods/features/adblock.js`) that runs on every response 
 - JSON.stringify wrapper: single-pass in-place mutation (sets `isInlinePlaybackNoAd` on `value.playbackContext.contentPlaybackContext`, then calls orig once). Idempotent.
 
 ### Smoke test
+
 `smoke-test.js` at repo root (copied from temp harness). Drives the real built bundle with DOM/TV stubs; 8 assertions all pass. Stub gotchas documented in the file:
+
 - `window.JSON: JSON` must be stubbed before `require(BUNDLE)`; capture natives first.
 - localStorage stub must sync bracket property `localStorageStub[CONFIG_KEY]`.
 - All config keys read during parses must be in the initial `setConfig` (before require) — `configRead` caches from `localConfig` initialized at bundle load.
@@ -70,6 +76,7 @@ User request: *"is it possible to keep user waiting at YOUTUBE loading screen un
 User rejected a branded custom overlay (`bootScreen.js` idea). Wants the **native** loader held on screen.
 
 ### Plan (NOT implemented)
+
 - New module `mods/ui/bootLoader.js`, imported right after `whatwg-fetch` in `mods/userScript.js`.
 - MutationObserver on `documentElement`: when the app's spinner/loader element appears, capture `cloneNode(true)` into a fixed full-screen black overlay (`z-index` top).
 - Remove the overlay when `mods/ui/ui.js` `execute_once_dom_loaded()` sets `initialized = true` (ui.js:22) — the exact point where all patches/CSS are applied. Plus a ~12s safety timeout.
@@ -82,11 +89,13 @@ User rejected a branded custom overlay (`bootScreen.js` idea). Wants the **nativ
 ## 3. Force 1440p/4K on a 1080p screen (RESEARCHED; plan in progress)
 
 ### User-visible symptoms
+
 - Selecting 1440p in settings does nothing — every video caps at 1080p.
 - At 1080p, two format codes exist: **itag 399 (AV1) = 19.77 MiB** and **itag 137 (H264) = 32.17 MiB**, same framerate. AV1 is heavily compressed; H264 carries far more data.
 - Codec selection in settings **does** work on the real TV (confirmed by user) — proving the `/player` response does flow through the patched `JSON.parse` on real Cobalt.
 
 ### Protocol findings (Playwright, Tizen 4.0 UA, logged in)
+
 - Test video used: `https://www.youtube.com/tv#/watch?v=Eo5w2S-h5dI`.
 - Playwright quirk: the TV page lives in a **separate context** created with `newContext({userAgent, viewport 1920x1080})`. Snapshot/network/console MCP tools don't see it; everything goes through `playwright_browser_run_code_unsafe`, targeting `page.context().browser().contexts().flatMap(c => c.pages()).find(p => p.url().includes('youtube.com'))`.
 - The TV client **never hits `/youtubei/v1/player`**. Flow: `/youtubei/v1/next` (JSON, has `context.client.screenWidthPoints/HeightPoints` and `watchEndpointSupportedOnesieConfig.html5PlaybackOnesieConfig.commonConfig.url` = googlevideo `initplayback?...&id=<hex>`) → binary protobuf POST to `https://rr*.googlevideo.com/videoplayback?...` → ~1MB binary `application/vnd.yt-ump` manifest (the onesie/UMP protocol) containing all formats.
@@ -96,18 +105,23 @@ User rejected a branded custom overlay (`bootScreen.js` idea). Wants the **nativ
 - In-page `window.fetch`/`XMLHttpRequest` patches catch **nothing** for the player/onesie traffic on the desktop TV-UA path (goes through Cobalt's internal media stack / not page-visible on the real TV).
 
 ### Conclusion / verdict
+
 1. Request side is NOT the limiter (onesie already asks for up to 4K; the server already can send 1440p H264).
 2. The 1080p ceiling is imposed **client-side by Cobalt's player selection**: the available-quality list caps at screen height, and it prefers AV1 (whose ladder caps at 1080p here).
 3. `setPlaybackQualityRange('hd1440')` only works if the player's available list contains it — it doesn't, so it clamps.
 4. Desktop web "downscales" because the desktop GPU decodes 4K and scales to the panel; on Tizen, Cobalt uses the SoC hardware decoder — a 1080p TV chip often caps at 1080p, but many Samsung SoCs decode H264 4K fine even on 1080p panels (1440p H264 likely decodable → real supersampling gain possible).
 
 ### Proposed fix (NOT implemented — user said "dont implement, still in plan phase", then asked to check current code)
+
 Two parts, both in reachable code:
+
 1. **Spoof screen size in the outgoing player request**: extend the patched `JSON.stringify` wrapper (`mods/features/adblock.js:280-289`) — when `value.playbackContext` exists (a player request), also set `context.client.screenWidthPoints=2560, screenHeightPoints=1440` (or 3840x2160) → server includes 1440p/4K formats in `adaptiveFormats`.
 2. **Force selection past the available-list cap**: in `mods/features/preferredVideoQuality.js`, when the preferred quality isn't in `getAvailableQualityData()`, call `setPlaybackQualityRange('hd1440','hd1440')` (or `hd2160`) with the literal level instead of clamping to nearest. Since the response now contains those formats, the player can select them even though the screen is 1080p.
+
 - Correlation: with **H264 selected**, the codec filter (`adblock.js:68-77`) keeps 137 (H264 1080p) *and* 264 (H264 1440p) — higher-bitrate files Cobalt would otherwise drop for the tiny AV1 399.
 
 ### Current code locations (for reference)
+
 - Codec filter: `mods/features/adblock.js:68-77` — inside patched `JSON.parse`; if `videoPreferredCodec !== 'any'` and a matching format exists, keeps only `audio/` + matching video mimeTypes. This is what makes codec selection work on TV.
 - JSON.stringify wrapper: `mods/features/adblock.js:279-290` — `const origStringify = JSON.stringify; JSON.stringify = function(value, replacer, space){ const pc = value?.playbackContext?.contentPlaybackContext; if (pc && !pc.isInlinePlaybackNoAd) { pc.isInlinePlaybackNoAd = true; return origStringify.call(this, value, replacer, space); } return origStringify.call(this, value, replacer, space); }; window.JSON.stringify = JSON.stringify;`
 - Quality handler: `mods/features/preferredVideoQuality.js` — polls `.html5-video-player` every 100ms; on play applies via `setPlaybackQualityRange(quality, quality)` (line 95); `#determineQuality()` (line 102) uses `getAvailableQualityData?.()` qualityLabels, exact match else nearest.
@@ -117,11 +131,13 @@ Two parts, both in reachable code:
 ---
 
 ## 4. Feature ideas (all REJECTED by user — do not propose again)
+
 auto-skip recap, sleep timer, per-video resume, subtitle styling, autoplay toggle, sidebar tab reordering, queue reorder/shuffle, OLED theme, volume normalization, play-from-start long-press, watch history, branded boot overlay.
 
 ---
 
 ## 5. Useful architecture reference
+
 - `mods/userScript.js` import order: core-js/stable → polyfills.js → whatwg-fetch → userAgentSpoofing, translations/index, domrect-polyfill, adblock, hqThumbnailsFocusObserver, sponsorblock, ui/ui, ui/speedUI, ui/theme, ui/settings, ui/disableWhosWatching, features/moreSubtitles, features/updater, features/pictureInPicture, features/preferredVideoQuality, features/videoQueuing, features/enableFeatures, ui/customUI, ui/customGuideAction, features/autoFrameRate, features/premiumLogo.
 - Config: localStorage key `"ytaf-configuration"`; 58 keys in `defaultConfig` (enableAdBlock, enableSponsorBlock*, sponsorBlockManualSkips, videoSpeed, preferredVideoQuality:"auto", enableDeArrow, enableDeArrowThumbnails, focusContainerColor, routeColor, enableFixedUI, enableHqThumbnails:true, enableChapters, enableLongPress, enableShorts, enablePremiumLogo, dontCheckUpdateUntil, whosWatching*, enableShowUserLanguage, enableShowOtherLanguages, showWelcomeToast, enablePreviousNextButtons, enableSuperThanksButton, enableSpeedControlsButton, enablePatchingVideoPlayer, enableMPButton, enableSwapMPWithPIP, enablePreviews, enableHideWatchedVideos, hideWatchedVideosThreshold:80, hideWatchedVideosPages, enableHideEndScreenCards, enableYouThereRenderer, lastAnnouncementCheck, enableScreenDimming, dimmingTimeout:60, dimmingOpacity:0.5, enablePaidPromotionOverlay, speedSettingsIncrement:0.25, videoPreferredCodec:"any", launchToOnStartup, reloadHomeOnStartup, disabledSidebarContents, disableChannelsOnSidebar, enableUpdater, autoFrameRate, autoFrameRatePauseVideoFor, enableSigninReminder, sortSubscriptionsByAlphabet).
 - Rollup config `mods/rollup.config.js`: input userScript.js → `../dist/userScript.js` iife; plugins json/string(css)/nodeResolve/commonjs; babel Chrome 47 (async-to-generator, class-properties, for-of, object-rest-spread, optional-chaining, nullish-coalescing, logical-assignment, numeric-separator); terser ecma:5, mangle reserved [h5vcc,_yttv,localStorage], passes:1; `\uFFFF`→`\u0000` replace.

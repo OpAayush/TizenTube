@@ -1,8 +1,8 @@
 {
   "name": "axotube",
   "appName": "axotube",
-  "version": "1.15.18",
-  "description": "AixoTube is an ad-free and sponsor-free solution for your favourite streaming website on your Tizen (Samsung) TVs.",
+  "version": "1.15.19",
+  "description": "axotube is an ad-free and sponsor-free solution for your favourite streaming website on your Tizen (Samsung) TVs.",
   "packageType": "mods",
   "websiteURL": "https://youtube.com/tv?additionalDataUrl=http%3A%2F%2Flocalhost%3A8085%2Fdial%2Fapps%2FYouTube",
   "main": "dist/userScript.js",

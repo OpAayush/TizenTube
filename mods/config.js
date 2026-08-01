@@ -29,7 +29,6 @@ const defaultConfig = {
   routeColor: "#0f0f0f",
   enableFixedUI: window.h5vcc && window.h5vcc.tizentube ? false : true,
   enableHqThumbnails: true,
-  enableChapters: true,
   enableLongPress: true,
   enableShorts: true,
   enablePremiumLogo: false,
@@ -52,7 +51,6 @@ const defaultConfig = {
   hideWatchedVideosPages: [],
   enableHideEndScreenCards: false,
   enableYouThereRenderer: true,
-  lastAnnouncementCheck: 0,
   enableScreenDimming: false,
   dimmingTimeout: 60,
   dimmingOpacity: 0.5,
@@ -136,3 +134,8 @@ export function configWrite(key, value) {
 }
 
 export const configChangeEmitter = new EventTarget();
+
+// Exposed for modules that deep-copy JSON inside the patched wrappers
+// (adblock.js addPreviews/makeQueuePayload). Calling window.JSON.parse
+// there re-enters the patched wrapper on every tile — use these natives.
+export { nativeJSONParse, nativeJSONStringify };

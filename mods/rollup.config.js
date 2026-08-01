@@ -22,7 +22,7 @@ export default {
     }),
 
     commonjs({
-      // Include node_modules AND our own mods folder (needed for core-js)
+      // Include node_modules AND our own mods folder
       include: [/node_modules/, /mods/],
       transformMixedEsModules: true,
     }),
@@ -37,10 +37,10 @@ export default {
             targets: {
               browsers: ["Chrome 47"],
             },
-            // useBuiltIns is intentionally NOT set here – polyfills are
-            // injected via explicit 'core-js/stable' + 'regenerator-runtime'
-            // imports in userScript.js and bundled by rollup before this
-            // output plugin runs.
+            // useBuiltIns is intentionally NOT set here – no core-js /
+            // regenerator-runtime polyfills are bundled; the polyfills we
+            // need are hand-written in mods/polyfills.js (imported first in
+            // userScript.js) to keep the bundle lean for Tizen 4.
             modules: false,
 
             // Explicitly include transforms that must fire for Tizen 4:

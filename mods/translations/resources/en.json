@@ -60,6 +60,27 @@
                     "reloadHomeOnStartup": "Reload Home on Startup"
                 }
             },
+            "theme": {
+                "title": "Theme",
+                "options": {
+                    "focusColor": {
+                        "title": "Navigation Bar Color"
+                    },
+                    "routeColor": {
+                        "title": "Main Content Color"
+                    },
+                    "colors": {
+                        "default": "Default (Dark)",
+                        "black": "Black",
+                        "darkGray": "Dark Gray",
+                        "charcoal": "Charcoal",
+                        "navy": "Navy Blue",
+                        "darkRed": "Dark Red",
+                        "darkGreen": "Dark Green",
+                        "darkPurple": "Dark Purple"
+                    }
+                }
+            },
             "subtitles": {
                 "title": "Subtitle Settings",
                 "options": {

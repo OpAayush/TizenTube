@@ -353,6 +353,123 @@ export default function modernUI(update, parameters) {
       ],
     },
     {
+      name: t("settings.options.theme.title"),
+      icon: "STYLE",
+      value: null,
+      options: [
+        {
+          name: t("settings.options.theme.options.focusColor.title"),
+          icon: "COLOR_LENS",
+          value: null,
+          options: [
+            {
+              name: t("settings.options.theme.options.colors.default"),
+              icon: "COLOR_LENS",
+              key: "focusContainerColor",
+              value: "#0f0f0f",
+            },
+            {
+              name: t("settings.options.theme.options.colors.black"),
+              icon: "COLOR_LENS",
+              key: "focusContainerColor",
+              value: "#000000",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkGray"),
+              icon: "COLOR_LENS",
+              key: "focusContainerColor",
+              value: "#1c1a1a",
+            },
+            {
+              name: t("settings.options.theme.options.colors.charcoal"),
+              icon: "COLOR_LENS",
+              key: "focusContainerColor",
+              value: "#121212",
+            },
+            {
+              name: t("settings.options.theme.options.colors.navy"),
+              icon: "COLOR_LENS",
+              key: "focusContainerColor",
+              value: "#0d1b2a",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkRed"),
+              icon: "COLOR_LENS",
+              key: "focusContainerColor",
+              value: "#3b0505",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkGreen"),
+              icon: "COLOR_LENS",
+              key: "focusContainerColor",
+              value: "#052e1b",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkPurple"),
+              icon: "COLOR_LENS",
+              key: "focusContainerColor",
+              value: "#1a1025",
+            },
+          ],
+        },
+        {
+          name: t("settings.options.theme.options.routeColor.title"),
+          icon: "COLOR_LENS",
+          value: null,
+          options: [
+            {
+              name: t("settings.options.theme.options.colors.default"),
+              icon: "COLOR_LENS",
+              key: "routeColor",
+              value: "#0f0f0f",
+            },
+            {
+              name: t("settings.options.theme.options.colors.black"),
+              icon: "COLOR_LENS",
+              key: "routeColor",
+              value: "#000000",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkGray"),
+              icon: "COLOR_LENS",
+              key: "routeColor",
+              value: "#1c1a1a",
+            },
+            {
+              name: t("settings.options.theme.options.colors.charcoal"),
+              icon: "COLOR_LENS",
+              key: "routeColor",
+              value: "#121212",
+            },
+            {
+              name: t("settings.options.theme.options.colors.navy"),
+              icon: "COLOR_LENS",
+              key: "routeColor",
+              value: "#0d1b2a",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkRed"),
+              icon: "COLOR_LENS",
+              key: "routeColor",
+              value: "#3b0505",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkGreen"),
+              icon: "COLOR_LENS",
+              key: "routeColor",
+              value: "#052e1b",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkPurple"),
+              icon: "COLOR_LENS",
+              key: "routeColor",
+              value: "#1a1025",
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: t("settings.options.subtitles.title"),
       icon: "TRANSLATE",
       value: null,
@@ -1196,7 +1313,7 @@ export function optionShow(parameters, update) {
   }
 
   showModal(
-    parameters.menuHeader ? parameters.menuHeader : "AixoTube Settings",
+    parameters.menuHeader ? parameters.menuHeader : "axotube Settings",
     overlayPanelItemListRenderer(buttons, parameters.selectedIndex),
     parameters.menuId || "tt-settings-options",
     update,

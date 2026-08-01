@@ -6,21 +6,40 @@
 let held = false;
 let overlay = null;
 let grabbed = false;
+let observer = null;
 
 function release() {
   if (!held) return;
   held = false;
+  if (observer) {
+    try {
+      observer.disconnect();
+    } catch (e) {
+      /* noop */
+    }
+    observer = null;
+  }
   if (overlay && overlay.parentNode) {
     overlay.parentNode.removeChild(overlay);
   }
   overlay = null;
-  console.info("[AixoTube] Boot loader released");
+  console.info("[axotube] Boot loader released");
 }
 
 window.__releaseBootLoader = release;
 
 // Never hold the loader longer than this in case init never completes.
-setTimeout(release, 10000);
+setTimeout(() => {
+  if (observer) {
+    try {
+      observer.disconnect();
+    } catch (e) {
+      /* noop */
+    }
+    observer = null;
+  }
+  release();
+}, 10000);
 
 function grab() {
   if (held || grabbed) return;
@@ -42,15 +61,25 @@ function grab() {
   const bgImage = (cs && cs.backgroundImage) || "none";
   overlay.style.cssText =
     "position:fixed;top:0;left:0;width:100%;height:100%;z-index:2147483647;" +
-    "background-color:" + bgColor + ";" +
-    "background-image:" + bgImage + ";" +
-    "background-position:" + ((cs && cs.backgroundPosition) || "center center") + ";" +
-    "background-repeat:" + ((cs && cs.backgroundRepeat) || "no-repeat") + ";" +
-    "background-size:" + ((cs && cs.backgroundSize) || "60%") + ";";
+    "background-color:" +
+    bgColor +
+    ";" +
+    "background-image:" +
+    bgImage +
+    ";" +
+    "background-position:" +
+    ((cs && cs.backgroundPosition) || "center center") +
+    ";" +
+    "background-repeat:" +
+    ((cs && cs.backgroundRepeat) || "no-repeat") +
+    ";" +
+    "background-size:" +
+    ((cs && cs.backgroundSize) || "60%") +
+    ";";
   (document.body || document.documentElement).appendChild(overlay);
   held = true;
   grabbed = true;
-  console.info("[AixoTube] Boot loader held (#loader captured)");
+  console.info("[axotube] Boot loader held (#loader captured)");
 }
 
 function watch() {
@@ -58,11 +87,14 @@ function watch() {
 
   // Catch #loader the instant it is parsed (fast, reliable at document-start).
   try {
-    const mo = new MutationObserver(() => {
+    observer = new MutationObserver(() => {
       grab();
-      if (grabbed) mo.disconnect();
+      if (grabbed && observer) observer.disconnect();
     });
-    mo.observe(document.documentElement, { childList: true, subtree: true });
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+    });
   } catch (e) {
     // MutationObserver unavailable: fall back to polling.
   }

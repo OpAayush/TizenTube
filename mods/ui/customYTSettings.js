@@ -19,6 +19,7 @@ function PatchSettings(settingsObject) {
         'axotube_category',
         [axotubeOpenAction]
     );
+    if (!settingsObject.items || !Array.isArray(settingsObject.items)) settingsObject.items = [];
     // Add it as the first item in the settings object
     settingsObject.items.unshift(axotubeCategory);
 

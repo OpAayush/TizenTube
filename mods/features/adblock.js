@@ -1,5 +1,4 @@
-import { configRead } from "../config.js";
-import Chapters from "../ui/chapters.js";
+import { configRead, nativeJSONParse, nativeJSONStringify } from "../config.js";
 import resolveCommand from "../resolveCommand.js";
 import {
   timelyAction,
@@ -40,16 +39,12 @@ const fetchWithTimeout = createFetchWithTimeout(FETCH_TIMEOUT);
  */
 const origParse = JSON.parse;
 JSON.parse = function () {
-  const r = origParse.apply(this, arguments);
-  try {
-    const adBlockEnabled = configRead('enableAdBlock');
-    const signinReminderEnabled = configRead('enableSigninReminder');
+    const r = origParse.apply(this, arguments);
+    try {
+      const adBlockEnabled = configRead('enableAdBlock');
+      const signinReminderEnabled = configRead('enableSigninReminder');
 
-    if (r?.playbackContext?.contentPlaybackContext) {
-      // Handled by the patched JSON.stringify below (isInlinePlaybackNoAd)
-    }
-
-    if (r.adPlacements && adBlockEnabled) {
+      if (r.adPlacements && adBlockEnabled) {
       r.adPlacements = [];
     }
 
@@ -67,11 +62,11 @@ JSON.parse = function () {
 
     if (r?.streamingData?.adaptiveFormats && configRead('videoPreferredCodec') !== 'any') {
       const preferredCodec = configRead('videoPreferredCodec');
-      const hasPreferredCodec = r.streamingData.adaptiveFormats.find(format => format.mimeType.includes(preferredCodec));
+      const hasPreferredCodec = r.streamingData.adaptiveFormats.find(format => format.mimeType && format.mimeType.includes(preferredCodec));
       if (hasPreferredCodec) {
         r.streamingData.adaptiveFormats = r.streamingData.adaptiveFormats.filter(format => {
-          if (format.mimeType.startsWith('audio/')) return true;
-          return format.mimeType.includes(preferredCodec);
+          if (format.mimeType && format.mimeType.startsWith('audio/')) return true;
+          return format.mimeType && format.mimeType.includes(preferredCodec);
         });
       }
     }
@@ -147,9 +142,12 @@ JSON.parse = function () {
         if (!section || !section.tabs) continue;
         if (configRead('sortSubscriptionsByAlphabet')) {
           section.tabs.sort((a, b) => {
-            if (a.tabRenderer.selected && !b.tabRenderer.selected) return -1;
-            if (!a.tabRenderer.selected && b.tabRenderer.selected) return 1;
-            return a.tabRenderer.title.localeCompare(b.tabRenderer.title);
+            const aTitle = a?.tabRenderer?.title;
+            const bTitle = b?.tabRenderer?.title;
+            if (a.tabRenderer?.selected && !b.tabRenderer?.selected) return -1;
+            if (!a.tabRenderer?.selected && b.tabRenderer?.selected) return 1;
+            if (aTitle && bTitle) return aTitle.localeCompare(bTitle);
+            return 0;
           });
         }
         for (let j = 0; j < section.tabs.length; j++) {
@@ -347,7 +345,7 @@ function addPreviews(items) {
       if (!watchEndpoint) continue;
       if (item.tileRenderer?.onFocusCommand?.playbackEndpoint) continue;
       if (item.tileRenderer?.onFocusCommand?.commandExecutorCommand) continue;
-      const copiedEndpoint = JSON.parse(JSON.stringify(watchEndpoint));
+      const copiedEndpoint = nativeJSONParse(nativeJSONStringify(watchEndpoint));
       item.tileRenderer.onFocusCommand = {
         startInlinePlaybackCommand: {
           blockAdoption: true,
@@ -519,11 +517,11 @@ function makeQueuePayload(item) {
   if (src.contentId !== undefined) tile.contentId = src.contentId;
   if (src.trackingParams !== undefined) tile.trackingParams = src.trackingParams;
   if (src.metadata !== undefined)
-    tile.metadata = JSON.parse(JSON.stringify(src.metadata));
+    tile.metadata = nativeJSONParse(nativeJSONStringify(src.metadata));
   if (src.header !== undefined)
-    tile.header = JSON.parse(JSON.stringify(src.header));
+    tile.header = nativeJSONParse(nativeJSONStringify(src.header));
   if (src.onSelectCommand !== undefined)
-    tile.onSelectCommand = JSON.parse(JSON.stringify(src.onSelectCommand));
+    tile.onSelectCommand = nativeJSONParse(nativeJSONStringify(src.onSelectCommand));
   return { tileRenderer: tile };
 }
 
@@ -565,6 +563,7 @@ function addLongPress(items) {
 }
 
 function hideVideo(items) {
+  if (!configRead("enableHideWatchedVideos")) return items;
   const pages = configRead("hideWatchedVideosPages");
   if (!pages || !pages.length) return items;
   const threshold = configRead("hideWatchedVideosThreshold");

@@ -1,6 +1,6 @@
-# AixoTube
+# axotube
 
-AixoTube is a TizenBrew module that enhances your favourite streaming websites viewing experience by removing ads and adding support for SponsorBlock.
+axotube is a TizenBrew module that enhances your favourite streaming websites viewing experience by removing ads and adding support for SponsorBlock.
 
 ## Credits
 

@@ -1,12 +1,16 @@
-// Picture in Picture Mode for AixoTube
+// Picture in Picture Mode for axotube
 
-// At function call, get it from window
-const resolveCommand =
-  window._yttv_resolveCommand ||
-  (window._yttv
-    ? Object.values(window._yttv).find((a) => a && a.instance?.resolveCommand)
-        ?.instance?.resolveCommand
-    : null);
+// Resolve lazily at call time: _yttv may not be populated when this module loads
+function getResolveCommand() {
+  return (
+    window._yttv_resolveCommand ||
+    (window._yttv
+      ? Object.values(window._yttv).find((a) => a && a.instance?.resolveCommand)
+          ?.instance?.resolveCommand
+      : null)
+  );
+}
+
 window.isPipPlaying = false;
 let PlayerService = null;
 let observerPipEnter = null;
@@ -110,6 +114,9 @@ function enablePip() {
 
     observer.observe(ytlrPlayer, { attributes: true });
 
+    const resolveCommand = getResolveCommand();
+    if (!resolveCommand) return;
+
     resolveCommand({
       signalAction: {
         signal: "HISTORY_BACK",
@@ -137,6 +144,9 @@ function pipToFullscreen() {
       commandMetadata,
       watchEndpoint,
     };
+
+    const resolveCommand = getResolveCommand();
+    if (!resolveCommand) return;
 
     resolveCommand(command);
     window.isPipPlaying = false;
