@@ -62,7 +62,12 @@
             },
             "theme": {
                 "title": "Theme",
+                "menuSubtitle": "Customize the colors used across the interface",
                 "options": {
+                    "presets": {
+                        "title": "Presets",
+                        "menuSubtitle": "Apply a pre-made color combination"
+                    },
                     "focusColor": {
                         "title": "Navigation Bar Color"
                     },

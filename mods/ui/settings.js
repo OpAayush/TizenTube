@@ -356,11 +356,77 @@ export default function modernUI(update, parameters) {
       name: t("settings.options.theme.title"),
       icon: "STYLE",
       value: null,
+      menuId: "tt-theme-settings",
+      menuHeader: {
+        title: t("settings.options.theme.title"),
+        subtitle: t("settings.options.theme.menuSubtitle"),
+      },
       options: [
+        {
+          name: t("settings.options.theme.options.presets.title"),
+          icon: "STYLE",
+          value: null,
+          menuId: "tt-theme-presets",
+          menuHeader: {
+            title: t("settings.options.theme.options.presets.title"),
+            subtitle: t("settings.options.theme.options.presets.menuSubtitle"),
+          },
+          options: [
+            {
+              name: t("settings.options.theme.options.colors.default"),
+              icon: "COLOR_LENS",
+              key: "themePreset",
+              value: "default",
+            },
+            {
+              name: t("settings.options.theme.options.colors.black"),
+              icon: "COLOR_LENS",
+              key: "themePreset",
+              value: "black",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkGray"),
+              icon: "COLOR_LENS",
+              key: "themePreset",
+              value: "darkGray",
+            },
+            {
+              name: t("settings.options.theme.options.colors.charcoal"),
+              icon: "COLOR_LENS",
+              key: "themePreset",
+              value: "charcoal",
+            },
+            {
+              name: t("settings.options.theme.options.colors.navy"),
+              icon: "COLOR_LENS",
+              key: "themePreset",
+              value: "navy",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkRed"),
+              icon: "COLOR_LENS",
+              key: "themePreset",
+              value: "darkRed",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkGreen"),
+              icon: "COLOR_LENS",
+              key: "themePreset",
+              value: "darkGreen",
+            },
+            {
+              name: t("settings.options.theme.options.colors.darkPurple"),
+              icon: "COLOR_LENS",
+              key: "themePreset",
+              value: "darkPurple",
+            },
+          ],
+        },
         {
           name: t("settings.options.theme.options.focusColor.title"),
           icon: "COLOR_LENS",
           value: null,
+          menuId: "tt-theme-focus-color",
           options: [
             {
               name: t("settings.options.theme.options.colors.default"),
@@ -416,6 +482,7 @@ export default function modernUI(update, parameters) {
           name: t("settings.options.theme.options.routeColor.title"),
           icon: "COLOR_LENS",
           value: null,
+          menuId: "tt-theme-route-color",
           options: [
             {
               name: t("settings.options.theme.options.colors.default"),

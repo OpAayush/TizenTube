@@ -77,6 +77,7 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     enableDeArrowThumbnails: false,
     focusContainerColor: "#0f0f0f",
     routeColor: "#0f0f0f",
+    themePreset: "default",
     enableHqThumbnails: true,
     enableLongPress: true,
     enableShorts: true,
@@ -120,7 +121,7 @@ module.exports.webConfigPage = `<!DOCTYPE html>
   var ENUMS = {
     preferredVideoQuality: ["auto", "2160p", "1440p", "1080p", "720p", "480p", "360p", "240p", "144p"],
     videoPreferredCodec: ["any", "vp9", "av01", "avc1"],
-    speedSettingsIncrement: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
+    themePreset: ["default", "black", "darkGray", "charcoal", "navy", "darkRed", "darkGreen", "darkPurple"],    speedSettingsIncrement: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
   };
   var RANGES = {
     hideWatchedVideosThreshold: [0, 100, 1],
@@ -182,7 +183,7 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     var html = "";
     Object.keys(DEFAULTS).forEach(function (k) {
       if (q && k.toLowerCase().indexOf(q) === -1) return;
-      html += '<div class="row" data-key="' + k + '"><div class="key">' + k + "</div><div class=\"ctrl\">" + controlHtml(k) + "</div></div>";
+      html += '<div class="row" data-key="' + k + '"><div class="key">' + k + '</div><div class="ctrl">' + controlHtml(k) + '</div></div>';
     });
     main.innerHTML = html;
     Object.keys(DEFAULTS).forEach(function (k) {
@@ -251,6 +252,22 @@ module.exports.webConfigPage = `<!DOCTYPE html>
       row.querySelector("[data-enum]").addEventListener("change", function (e) {
         var raw = e.target.value;
         state[k] = typeof DEFAULTS[k] === "number" ? Number(raw) : raw;
+        if (k === "themePreset") {
+          var preset = {
+            default: ["#0f0f0f", "#0f0f0f"],
+            black: ["#000000", "#000000"],
+            darkGray: ["#1c1a1a", "#121212"],
+            charcoal: ["#121212", "#121212"],
+            navy: ["#0d1b2a", "#121212"],
+            darkRed: ["#3b0505", "#121212"],
+            darkGreen: ["#052e1b", "#121212"],
+            darkPurple: ["#1a1025", "#121212"]
+          }[raw];
+          if (preset) {
+            state.focusContainerColor = preset[0];
+            state.routeColor = preset[1];
+          }
+        }
       });
     } else if (RANGES[k]) {
       row.querySelector("[data-range]").addEventListener("input", function (e) {
