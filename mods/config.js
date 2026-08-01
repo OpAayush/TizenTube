@@ -135,6 +135,12 @@ export function configWrite(key, value) {
 
 export const configChangeEmitter = new EventTarget();
 
+// Deep snapshot of the entire config, used by the web-config sync module to
+// push the app's current state to the service (config.js:127 configWrite).
+export function configSnapshot() {
+  return clone(localConfig);
+}
+
 // Exposed for modules that deep-copy JSON inside the patched wrappers
 // (adblock.js addPreviews/makeQueuePayload). Calling window.JSON.parse
 // there re-enters the patched wrapper on every tile — use these natives.

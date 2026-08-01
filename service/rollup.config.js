@@ -3,6 +3,7 @@ import commonjs from "@rollup/plugin-commonjs";
 import babel from "@rollup/plugin-babel";
 import replace from "@rollup/plugin-replace";
 import json from "@rollup/plugin-json";
+import terser from "@rollup/plugin-terser";
 import fs from "fs";
 
 function injectXmlContent() {
@@ -53,6 +54,11 @@ export default {
     babel({
       babelHelpers: "bundled",
       presets: ["@babel/preset-env"],
+    }),
+    terser({
+      ecma: 5,
+      mangle: { reserved: ["tizen"] },
+      compress: { passes: 1 },
     }),
   ],
 };

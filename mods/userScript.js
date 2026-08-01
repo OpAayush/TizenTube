@@ -37,6 +37,8 @@ import "./features/pictureInPicture.js";
 import "./features/preferredVideoQuality.js";
 import "./features/videoQueuing.js";
 import "./features/enableFeatures.js";
+import "./features/webConfig.js";
+import "./features/castReceiver.js";
 import "./ui/customUI.js";
 import "./ui/customGuideAction.js";
 import "./features/autoFrameRate.js";

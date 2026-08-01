@@ -7,6 +7,7 @@ import resolveCommand, { patchResolveCommand } from "../resolveCommand.js";
 import { pipToFullscreen } from "../features/pictureInPicture.js";
 import getCommandExecutor from "./customCommandExecution.js";
 import { t } from "i18next";
+import AXOTUBE_VERSION from "../version.js";
 
 let initialized = false;
 let keyTimeout = null;
@@ -113,7 +114,7 @@ function execute_once_dom_loaded() {
 
   setTimeout(() => {
     if (configRead("showWelcomeToast")) {
-      showToast(t("welcomeMsg.title"), t("welcomeMsg.subtitle"));
+      showToast(t("welcomeMsg.title"), `${t("welcomeMsg.subtitle")} · v${AXOTUBE_VERSION}`);
     }
   }, 1000);
 

@@ -5,6 +5,16 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
+import { readFileSync } from "fs";
+
+// Read the version from the root package.json so it's baked into the bundle
+// at build time (shown in the welcome toast). mods/package.json has its own
+// version, so we explicitly read the project root one. The build runs from
+// the mods/ directory, so the root package.json is one level up.
+const rootPackage = JSON.parse(
+  readFileSync(`${process.cwd()}/../package.json`, "utf8"),
+);
+const AXOTUBE_VERSION = String(rootPackage.version);
 
 export default {
   input: "userScript.js",
@@ -91,6 +101,10 @@ export default {
     replace({
       preventAssignment: true,
       "\uFFFF": "\\ufffd",
+      // Bake the version from the root package.json into the bundle
+      // (mods/version.js token -> e.g. "1.15.19"). The token lives inside a
+      // string literal, so replace with the bare value (no quotes added).
+      "__AXOTUBE_VERSION__": AXOTUBE_VERSION,
     }),
   ],
 };
