@@ -488,8 +488,8 @@ window.sponsorblock = null;
 window.addEventListener(
   "hashchange",
   () => {
-    const newURL = new URL(location.hash.substring(1), location.href);
-    const videoID = newURL.search.replace("?v=", "").split("&")[0];
+    const match = /[?&]v=([^&]+)/.exec(location.hash);
+    const videoID = match ? match[1] : null;
     const needsReload =
       videoID &&
       (!window.sponsorblock || window.sponsorblock.videoID != videoID);

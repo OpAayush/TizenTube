@@ -52,6 +52,7 @@ const localStorageStub = {
 setConfig({ enableHqThumbnails: true, enableDeArrow: true, enableLongPress: true, enableShorts: false, hideWatchedVideosPages: ['home'], hideWatchedVideosThreshold: 80 });
 
 global.localStorage = localStorageStub;
+global.self = globalThis; // bundle expects a browser-like global `self`
 global.window = {
   localStorage: localStorageStub,
   _yttv: {},

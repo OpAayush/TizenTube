@@ -2,22 +2,21 @@
  * userScript.js – AixoTube entry point.
  *
  * Import order matters for Tizen 4 (N5470 / Cobalt) compatibility:
- *  1. core-js/stable  – polyfills for ES built-ins not natively available
- *                       in Chromium 47 (Array.flat, Object.fromEntries, …)
- *  2. polyfills.js    – browser-API polyfills NOT covered by core-js
- *                       (EventTarget ctor, AbortController, CustomEvent, …)
- *  3. whatwg-fetch    – fetch() polyfill
- *  4. app modules     – everything else
+ *  1. polyfills.js    – browser-API + ES-builtin polyfills for Chromium 47
+ *                       (EventTarget ctor, AbortController, CustomEvent,
+ *                       Object.entries/values, Array.flat, …)
+ *  2. whatwg-fetch    – fetch() polyfill
+ *  3. app modules     – everything else
  */
 
-// ── 1. core-js: polyfills needed for Chrome 47 ───────────────────────────────
-import 'core-js/stable';
-
-// ── 2. Browser-API polyfills (EventTarget ctor, AbortController, …) ───────────
+// ── 1. Browser-API + ES-builtin polyfills (EventTarget ctor, AbortController, …) ─
 import './polyfills.js';
 
-// ── 3. Fetch polyfill ─────────────────────────────────────────────────────────
+// ── 2. Fetch polyfill ─────────────────────────────────────────────────────────
 import 'whatwg-fetch';
+
+// ── 3. Boot loader (hold native splash until TizenTube is ready) ──────────────
+import './ui/bootLoader.js';
 
 // ── 5. Application modules ────────────────────────────────────────────────────
 import './features/userAgentSpoofing.js';

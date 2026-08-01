@@ -85,9 +85,12 @@ export default {
 
     // Terser/Babel can emit \uFFFF sequences that old V8/Cobalt engines
     // treat as invalid tokens, preventing the entire bundle from parsing.
+    // Replace the U+FFFF character with the ASCII escape sequence text so
+    // the output contains no raw control bytes (raw NUL breaks Violentmonkey
+    // and is risky on old Cobalt parsers).
     replace({
       preventAssignment: true,
-      "\uFFFF": "\u0000",
+      "\uFFFF": "\\ufffd",
     }),
   ],
 };

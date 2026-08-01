@@ -270,6 +270,28 @@
 }());
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Object.entries / Object.values
+// Chrome 47 (Tizen 4) lacks these; shipped natively in Chrome 54.
+// ─────────────────────────────────────────────────────────────────────────────
+(function () {
+  if (typeof Object.values === 'function' && typeof Object.entries === 'function') return;
+
+  Object.values = Object.values || function valuesPolyfill(obj) {
+    var keys = Object.keys(obj);
+    var out = [];
+    for (var i = 0; i < keys.length; i++) out.push(obj[keys[i]]);
+    return out;
+  };
+
+  Object.entries = Object.entries || function entriesPolyfill(obj) {
+    var keys = Object.keys(obj);
+    var out = [];
+    for (var i = 0; i < keys.length; i++) out.push([keys[i], obj[keys[i]]]);
+    return out;
+  };
+}());
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Object.fromEntries
 // settings.js uses Object.fromEntries(…)
 // ─────────────────────────────────────────────────────────────────────────────

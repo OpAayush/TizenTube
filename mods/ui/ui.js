@@ -30,6 +30,10 @@ function execute_once_dom_loaded() {
     document.head.appendChild(style);
   }
 
+  if (typeof window.__releaseBootLoader === "function") {
+    window.__releaseBootLoader();
+  }
+
   const ui = configRead("enableFixedUI");
   if (ui) {
     try {
