@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "DeArrow choHtaHghach",
                 "options": {
-                    "enableDA": "DeArrow yIchu'",
-                    "enableDAThumbnails": "DeArrow mI' yIchu'"
+                    "enableTitles": "DeArrow yIchu'",
+                    "enableThumbnails": "DeArrow mI' yIchu'"
                 }
             },
             "misc": {
@@ -140,7 +140,7 @@
                 }
             },
             "updater": {
-                "title": "TizenTube Cobalt chu'ghach",
+                "title": "AxoTube Cobalt chu'ghach",
                 "menuSubtitle": "chu'ghach yInuqlI'",
                 "versionSubtitle": "Version: {{version}}",
                 "options": {
@@ -150,17 +150,17 @@
             }
         },
         "ttSettings": {
-            "title": "TizenTube choHtaHghach",
+            "title": "AxoTube choHtaHghach",
             "madeByText": "Reis Can (reisxd) bang ❤️",
-            "summary": "TizenTube choHtaHghach yIpoS"
+            "summary": "AxoTube choHtaHghach yIpoS"
         },
         "supportTT": {
-            "title": "TizenTube yIQah",
-            "subtitle": "❤️ TizenTube yIQah",
+            "title": "AxoTube yIQah",
+            "subtitle": "❤️ AxoTube yIQah",
             "content": {
-                "1": "TizenTube yIQah:",
+                "1": "AxoTube yIQah:",
                 "2": "1. GitHub Star yIchu'.",
-                "3": "2. TizenTube yIlatlh.",
+                "3": "2. AxoTube yIlatlh.",
                 "4": "Hvep yIQah:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -168,7 +168,7 @@
         }
     },
     "welcomeMsg": {
-        "title": "TizenTube-Daq yI'el!",
+        "title": "AxoTube-Daq yI'el!",
         "subtitle": "choHtaHghach yInuqlI'!"
     },
     "sponsorblock": {

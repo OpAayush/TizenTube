@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "DeArrow iestatījumi",
                 "options": {
-                    "enableDA": "Iespējot DeArrow",
-                    "enableDAThumbnails": "Iespējot DeArrow sīktēlus"
+                    "enableTitles": "Iespējot DeArrow nosaukumus",
+                    "enableThumbnails": "Iespējot DeArrow sīktēlus"
                 }
             },
             "misc": {
@@ -134,14 +134,14 @@
                     },
                     "launchToOnStartup": {
                         "title": "Sākumlapa palaišanas brīdī",
-                        "subtitle": "Izvēlieties noklusējuma lapu, kuru TizenTube atvērs palaišanas brīdī"
+                        "subtitle": "Izvēlieties noklusējuma lapu, kuru AxoTube atvērs palaišanas brīdī"
                     },
                     "sortSubscriptionsByAlphabet": "Sort Subscriptions Alphabetically"
                 }
             },
             "updater": {
-                "title": "TizenTube Cobalt atjauninātājs",
-                "menuSubtitle": "Pārvaldīt TizenTube Cobalt atjauninājumus",
+                "title": "AxoTube Cobalt atjauninātājs",
+                "menuSubtitle": "Pārvaldīt AxoTube Cobalt atjauninājumus",
                 "versionSubtitle": "Pašreizējā versija: {{version}}",
                 "options": {
                     "checkForUpdates": "Pārbaudīt atjauninājumus",
@@ -150,17 +150,17 @@
             }
         },
         "ttSettings": {
-            "title": "TizenTube iestatījumi",
+            "title": "AxoTube iestatījumi",
             "madeByText": "Izveidoja Reis Can (reisxd) ar ❤️",
-            "summary": "Atvērt TizenTube iestatījumus"
+            "summary": "Atvērt AxoTube iestatījumus"
         },
         "supportTT": {
-            "title": "Atbalstīt TizenTube",
-            "subtitle": "❤️ Atbalstiet TizenTube un tā izstrādi",
+            "title": "Atbalstīt AxoTube",
+            "subtitle": "❤️ Atbalstiet AxoTube un tā izstrādi",
             "content": {
-                "1": "Ja jums patīk lietot TizenTube un vēlaties atbalstīt tā izstrādi, apsveriet sekojošo:",
+                "1": "Ja jums patīk lietot AxoTube un vēlaties atbalstīt tā izstrādi, apsveriet sekojošo:",
                 "2": "1. Atzīmējiet GitHub repozitoriju ar zvaigznīti, lai palīdzētu uzlabot tā redzamību.",
-                "3": "2. Dalieties ar TizenTube ar citiem.",
+                "3": "2. Dalieties ar AxoTube ar citiem.",
                 "4": "Ja vēlaties sniegt finansiālu ieguldījumu, apsveriet ziedošanu:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (ieteicams)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -168,8 +168,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Laipni lūdzam TizenTube",
-        "subtitle": "Dodieties uz iestatījumiem un noklikšķiniet uz 'TizenTube iestatījumi', lai veiktu izmaiņas."
+        "title": "Laipni lūdzam AxoTube",
+        "subtitle": "Dodieties uz iestatījumiem un noklikšķiniet uz 'AxoTube iestatījumi', lai veiktu izmaiņas."
     },
     "sponsorblock": {
         "segments": {

@@ -30,8 +30,8 @@
             "dearrow": {
                 "title": "DeArrow beállítások",
                 "options": {
-                    "enableDA": "DeArrow engedélyezése",
-                    "enableDAThumbnails": "DeArrow bélyegképek engedélyezése"
+                    "enableTitles": "DeArrow címek engedélyezése",
+                    "enableThumbnails": "DeArrow bélyegképek engedélyezése"
                 }
             },
             "misc": {
@@ -136,8 +136,8 @@
                     }
                 },
                 "updater": {
-                    "title": "TizenTube Cobalt frissítő",
-                    "menuSubtitle": "TizenTube Cobalt frissítések kezelése",
+                    "title": "AxoTube Cobalt frissítő",
+                    "menuSubtitle": "AxoTube Cobalt frissítések kezelése",
                     "versionSubtitle": "Jelenlegi verzió: {{version}}",
                     "options": {
                         "checkForUpdates": "Frissítések keresése",
@@ -147,17 +147,17 @@
             }
         },
         "ttSettings": {
-            "title": "TizenTube beállítások",
+            "title": "AxoTube beállítások",
             "madeByText": "Készítette: Reis Can (reisxd) ❤️",
-            "summary": "TizenTube beállítások megnyitása"
+            "summary": "AxoTube beállítások megnyitása"
         },
         "supportTT": {
-            "title": "TizenTube támogatása",
-            "subtitle": "❤️ Támogasd a TizenTube fejlesztését",
+            "title": "AxoTube támogatása",
+            "subtitle": "❤️ Támogasd a AxoTube fejlesztését",
             "content": {
-                "1": "Ha szereted a TizenTube-ot és szeretnéd támogatni a fejlesztését, fontold meg a következőket:",
+                "1": "Ha szereted a AxoTube-ot és szeretnéd támogatni a fejlesztését, fontold meg a következőket:",
                 "2": "1. Adj egy csillagot a GitHub repositorynak, hogy többen megtalálják.",
-                "3": "2. Oszd meg a TizenTube-ot másokkal.",
+                "3": "2. Oszd meg a AxoTube-ot másokkal.",
                 "4": "Ha pénzügyileg is támogatnád:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (ajánlott)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -165,8 +165,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Üdvözlünk a TizenTube-ban",
-        "subtitle": "Menj a beállításokhoz és kattints a TizenTube beállításokra."
+        "title": "Üdvözlünk a AxoTube-ban",
+        "subtitle": "Menj a beállításokhoz és kattints a AxoTube beállításokra."
     },
     "sponsorblock": {
         "segments": {

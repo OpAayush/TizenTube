@@ -23,8 +23,8 @@ const defaultConfig = {
   enableSponsorBlockHighlight: true,
   videoSpeed: 1,
   preferredVideoQuality: "auto",
-  enableDeArrow: true,
-  enableDeArrowThumbnails: false,
+  enableDeArrowTitles: true,
+  enableDeArrowThumbnails: true,
   routeColor: "#0f0f0f",
   routeBackgroundUrl: "",
   themePreset: "default",
@@ -32,7 +32,6 @@ const defaultConfig = {
   enableHqThumbnails: true,
   enableLongPress: true,
   enableShorts: true,
-  enablePremiumLogo: false,
   dontCheckUpdateUntil: 0,
   enableWhoIsWatchingMenu: false,
   permanentlyEnableWhoIsWatchingMenu: false,
@@ -67,6 +66,7 @@ const defaultConfig = {
   autoFrameRatePauseVideoFor: 0,
   enableSigninReminder: false,
   sortSubscriptionsByAlphabet: false,
+  enableReducedMotion: false,
 };
 
 let localConfig;

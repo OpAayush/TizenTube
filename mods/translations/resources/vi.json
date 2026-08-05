@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "Cài đặt DeArrow",
                 "options": {
-                    "enableDA": "Bật DeArrow",
-                    "enableDAThumbnails": "Bật hình thu nhỏ DeArrow"
+                    "enableTitles": "Bật tiêu đề DeArrow",
+                    "enableThumbnails": "Bật hình thu nhỏ DeArrow"
                 }
             },
             "misc": {
@@ -55,7 +55,7 @@
                     "longPress": "Bật thao tác nhấn giữ",
                     "shorts": "Bật Shorts",
                     "videoPreviews": "Bật tính năng xem trước video",
-                    "ttWelcomeMsg": "Hiển thị thông báo chào mừng TizenTube",
+                    "ttWelcomeMsg": "Hiển thị thông báo chào mừng AxoTube",
                     "guestSignInReminder": "Hiển thị nhắc nhở đăng nhập cho chế độ khách",
                     "reloadHomeOnStartup": "Tải lại Trang chủ khi khởi động"
                 }
@@ -134,14 +134,14 @@
                     },
                     "launchToOnStartup": {
                         "title": "Trang khởi động",
-                        "subtitle": "Chọn trang mặc định mà TizenTube sẽ mở khi khởi động"
+                        "subtitle": "Chọn trang mặc định mà AxoTube sẽ mở khi khởi động"
                     },
                     "sortSubscriptionsByAlphabet": "Sắp xếp các kênh đăng ký theo bảng chữ cái"
                 }
             },
             "updater": {
-                "title": "Trình cập nhật TizenTube Cobalt",
-                "menuSubtitle": "Quản lý các bản cập nhật TizenTube Cobalt",
+                "title": "Trình cập nhật AxoTube Cobalt",
+                "menuSubtitle": "Quản lý các bản cập nhật AxoTube Cobalt",
                 "versionSubtitle": "Phiên bản hiện tại: {{version}}",
                 "options": {
                     "checkForUpdates": "Kiểm tra cập nhật",
@@ -150,17 +150,17 @@
             }
         },
         "ttSettings": {
-            "title": "Cài đặt TizenTube",
+            "title": "Cài đặt AxoTube",
             "madeByText": "Được tạo bởi Reis Can (reisxd) ❤️",
-            "summary": "Mở Cài đặt TizenTube"
+            "summary": "Mở Cài đặt AxoTube"
         },
         "supportTT": {
-            "title": "Ủng hộ TizenTube",
-            "subtitle": "❤️ Thể hiện sự ủng hộ dành cho TizenTube và đội ngũ phát triển!",
+            "title": "Ủng hộ AxoTube",
+            "subtitle": "❤️ Thể hiện sự ủng hộ dành cho AxoTube và đội ngũ phát triển!",
             "content": {
-                "1": "Nếu bạn thích sử dụng TizenTube và muốn ủng hộ đội ngũ phát triển dự án này, hãy:",
+                "1": "Nếu bạn thích sử dụng AxoTube và muốn ủng hộ đội ngũ phát triển dự án này, hãy:",
                 "2": "1. Tặng sao (Star) cho dự án ở trên GitHub để giúp dự án phổ biến hơn.",
-                "3": "2. Chia sẻ TizenTube với mọi người.",
+                "3": "2. Chia sẻ AxoTube với mọi người.",
                 "4": "Nếu bạn muốn quyên góp:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (ưu tiên)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -168,8 +168,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Chào mừng đến với TizenTube",
-        "subtitle": "Vào mục Cài đặt và nhấp vào Cài đặt TizenTube để tùy chỉnh."
+        "title": "Chào mừng đến với AxoTube",
+        "subtitle": "Vào mục Cài đặt và nhấp vào Cài đặt AxoTube để tùy chỉnh."
     },
     "sponsorblock": {
         "segments": {

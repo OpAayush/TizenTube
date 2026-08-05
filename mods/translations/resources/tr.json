@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "DeArrow Ayarları",
                 "options": {
-                    "enableDA": "DeArrow'u Etkinleştir",
-                    "enableDAThumbnails": "DeArrow Küçük Resimlerini Etkinleştir"
+                    "enableTitles": "DeArrow Başlıklarını Etkinleştir",
+                    "enableThumbnails": "DeArrow Küçük Resimlerini Etkinleştir"
                 }
             },
             "misc": {
@@ -136,15 +136,15 @@
                     },
                     "launchToOnStartup": {
                         "title": "Açılışta Başlatılacak Sayfa",
-                        "subtitle": "TizenTube'un açılışta varsayılan olarak açacağı sayfayı seçin"
+                        "subtitle": "AxoTube'un açılışta varsayılan olarak açacağı sayfayı seçin"
                     },
                     "sortSubscriptionsByAlphabet": "Abonelikleri Alfabetik Sırala",
                     "disableChannelsOnSidebar": "Kenar Çubuğunda Kanalları Devre Dışı Bırak"
                 }
             },
             "updater": {
-                "title": "TizenTube Cobalt Güncelleyici",
-                "menuSubtitle": "TizenTube Cobalt güncellemelerini yönetin",
+                "title": "AxoTube Cobalt Güncelleyici",
+                "menuSubtitle": "AxoTube Cobalt güncellemelerini yönetin",
                 "versionSubtitle": "Geçerli sürüm: {{version}}",
                 "options": {
                     "checkForUpdates": "Güncellemeleri kontrol et",
@@ -153,17 +153,17 @@
             }
         },
         "ttSettings": {
-            "title": "TizenTube Ayarları",
+            "title": "AxoTube Ayarları",
             "madeByText": "Reis Can (reisxd) tarafından ❤️ ile yapıldı",
-            "summary": "TizenTube Ayarlarını Aç"
+            "summary": "AxoTube Ayarlarını Aç"
         },
         "supportTT": {
-            "title": "TizenTube'u Destekleyin",
-            "subtitle": "❤️ TizenTube'a ve geliştirilmesine destek olun",
+            "title": "AxoTube'u Destekleyin",
+            "subtitle": "❤️ AxoTube'a ve geliştirilmesine destek olun",
             "content": {
-                "1": "TizenTube'u kullanmaktan memnunsanız ve geliştirilmesini desteklemek istiyorsanız, şunları değerlendirebilirsiniz:",
+                "1": "AxoTube'u kullanmaktan memnunsanız ve geliştirilmesini desteklemek istiyorsanız, şunları değerlendirebilirsiniz:",
                 "2": "1. Görünürlüğünü artırmaya yardımcı olmak için GitHub deposuna yıldız verin.",
-                "3": "2. TizenTube'u başkalarıyla paylaşın.",
+                "3": "2. AxoTube'u başkalarıyla paylaşın.",
                 "4": "Maddi olarak katkıda bulunmak isterseniz bağış yapmayı düşünebilirsiniz:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (tercihen)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -171,8 +171,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "TizenTube'a Hoş Geldiniz",
-        "subtitle": "Ayarlar menüsüne gidip TizenTube Ayarları'na tıklayarak ayarları açabilirsiniz."
+        "title": "AxoTube'a Hoş Geldiniz",
+        "subtitle": "Ayarlar menüsüne gidip AxoTube Ayarları'na tıklayarak ayarları açabilirsiniz."
     },
     "sponsorblock": {
         "segments": {

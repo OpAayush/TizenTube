@@ -34,8 +34,8 @@
             "dearrow": {
                 "title": "Setări DeArrow",
                 "options": {
-                    "enableDA": "Activează DeArrow",
-                    "enableDAThumbnails": "Activează previzualizări DeArrow"
+                    "enableTitles": "Activează titlurile DeArrow",
+                    "enableThumbnails": "Activează previzualizări DeArrow"
                 }
             },
             "misc": {
@@ -57,7 +57,7 @@
                     "longPress": "Activează acțiunile la apăsare lungă",
                     "shorts": "Activează Shorts",
                     "videoPreviews": "Activează previzualizările video",
-                    "ttWelcomeMsg": "Afișează mesajul de bun venit TizenTube",
+                    "ttWelcomeMsg": "Afișează mesajul de bun venit AxoTube",
                     "guestSignInReminder": "Afișează reamintirea de conectare ca oaspete",
                     "reloadHomeOnStartup": "Reîncarcă pagina principală la pornire"
                 }
@@ -136,14 +136,14 @@
                     },
                     "launchToOnStartup": {
                         "title": "Deschidere la pornire",
-                        "subtitle": "Alege pagina implicită pe care TizenTube o deschide la pornire"
+                        "subtitle": "Alege pagina implicită pe care AxoTube o deschide la pornire"
                     },
                     "sortSubscriptionsByAlphabet": "Sortează abonamentele în ordine alfabetică"
                 }
             },
             "updater": {
-                "title": "Actualizator TizenTube Cobalt",
-                "menuSubtitle": "Gestionează actualizările TizenTube Cobalt",
+                "title": "Actualizator AxoTube Cobalt",
+                "menuSubtitle": "Gestionează actualizările AxoTube Cobalt",
                 "versionSubtitle": "Versiunea actuală: {{version}}",
                 "options": {
                     "checkForUpdates": "Verifică dacă există actualizări noi",
@@ -152,17 +152,17 @@
             }
         },
         "ttSettings": {
-            "title": "Setări TizenTube",
+            "title": "Setări AxoTube",
             "madeByText": "Creat de Reis Can (reisxd), traducători: Alin (palincat), Vuzzy cu ❤️",
-            "summary": "Deschide setările TizenTube"
+            "summary": "Deschide setările AxoTube"
         },
         "supportTT": {
-            "title": "Susține TizenTube",
-            "subtitle": "❤️ Arată-ți sprijinul pentru TizenTube și dezvoltarea sa",
+            "title": "Susține AxoTube",
+            "subtitle": "❤️ Arată-ți sprijinul pentru AxoTube și dezvoltarea sa",
             "content": {
-                "1": "Dacă îți place să folosești TizenTube și vrei să sprijini dezvoltarea sa, ia în considerare următoarele:",
+                "1": "Dacă îți place să folosești AxoTube și vrei să sprijini dezvoltarea sa, ia în considerare următoarele:",
                 "2": "1. Oferă un star repository-ului de pe GitHub pentru a-i crește vizibilitatea.",
-                "3": "2. Distribuie TizenTube altora.",
+                "3": "2. Distribuie AxoTube altora.",
                 "4": "Dacă dorești să contribui financiar, ia în considerare donațiile:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (preferabil)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -170,8 +170,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Bine ai venit la TizenTube",
-        "subtitle": "Mergi la setări și dă click pe Setările TizenTube pentru opțiuni."
+        "title": "Bine ai venit la AxoTube",
+        "subtitle": "Mergi la setări și dă click pe Setările AxoTube pentru opțiuni."
     },
     "sponsorblock": {
         "segments": {

@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "Configurações do DeArrow",
                 "options": {
-                    "enableDA": "Ativar DeArrow",
-                    "enableDAThumbnails": "Ativar Miniaturas do DeArrow"
+                    "enableTitles": "Ativar títulos do DeArrow",
+                    "enableThumbnails": "Ativar Miniaturas do DeArrow"
                 }
             },
             "misc": {
@@ -134,14 +134,14 @@
                     },
                     "launchToOnStartup": {
                         "title": "Página Inicial ao Abrir",
-                        "subtitle": "Escolha a página padrão que o TizenTube abrirá na inicialização"
+                        "subtitle": "Escolha a página padrão que o AxoTube abrirá na inicialização"
                     },
                     "sortSubscriptionsByAlphabet": "Sort Subscriptions Alphabetically"
                 }
             },
             "updater": {
-                "title": "Atualizador do TizenTube Cobalt",
-                "menuSubtitle": "Gerenciar Atualizações do TizenTube Cobalt",
+                "title": "Atualizador do AxoTube Cobalt",
+                "menuSubtitle": "Gerenciar Atualizações do AxoTube Cobalt",
                 "versionSubtitle": "Versão Atual: {{version}}",
                 "options": {
                     "checkForUpdates": "Verificar Atualizações",
@@ -150,17 +150,17 @@
             }
         },
         "ttSettings": {
-            "title": "Configurações do TizenTube",
+            "title": "Configurações do AxoTube",
             "madeByText": "Feito por Reis Can (reisxd) com ❤️",
-            "summary": "Abrir Configurações do TizenTube"
+            "summary": "Abrir Configurações do AxoTube"
         },
         "supportTT": {
-            "title": "Apoie o TizenTube",
-            "subtitle": "❤️ Mostre apoio pelo TizenTube e seu desenvolvimento",
+            "title": "Apoie o AxoTube",
+            "subtitle": "❤️ Mostre apoio pelo AxoTube e seu desenvolvimento",
             "content": {
-                "1": "Se você gosta de usar o TizenTube e gostaria de apoiar o seu desenvolvimento, considere o seguinte:",
+                "1": "Se você gosta de usar o AxoTube e gostaria de apoiar o seu desenvolvimento, considere o seguinte:",
                 "2": "1. Dê uma estrela no repositório do GitHub para aumentar sua visibilidade.",
-                "3": "2. Compartilhe o TizenTube com outros.",
+                "3": "2. Compartilhe o AxoTube com outros.",
                 "4": "Se você gostaria de contribuir financeiramente, considere doar:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (preferencialmente)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -168,8 +168,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Bem-vindo ao TizenTube",
-        "subtitle": "Vá até as Configurações e clique em Configurações do TizenTube para abrir as configurações."
+        "title": "Bem-vindo ao AxoTube",
+        "subtitle": "Vá até as Configurações e clique em Configurações do AxoTube para abrir as configurações."
     },
     "sponsorblock": {
         "segments": {

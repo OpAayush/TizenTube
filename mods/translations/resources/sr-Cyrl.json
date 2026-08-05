@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "ДеАрроw подешавања",
                 "options": {
-                    "enableDA": "Омогући ДеАрроw",
-                    "enableDAThumbnails": "Омогући ДеАрроw сличице"
+                    "enableTitles": "ДеАрроw наслове",
+                    "enableThumbnails": "Омогући ДеАрроw сличице"
                 }
             },
             "misc": {

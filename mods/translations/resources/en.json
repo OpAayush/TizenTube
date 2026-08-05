@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "DeArrow Settings",
                 "options": {
-                    "enableDA": "Enable DeArrow",
-                    "enableDAThumbnails": "Enable DeArrow Thumbnails"
+                    "enableTitles": "Enable DeArrow Titles",
+                    "enableThumbnails": "Enable DeArrow Thumbnails"
                 }
             },
             "misc": {
@@ -52,6 +52,7 @@
                     },
                     "fixUI": "Fix UI",
                     "hqThumbnails": "Enable High Quality Thumbnails",
+                    "reducedMotion": "Reduced Motion Mode",
                     "longPress": "Enable Long Press Actions",
                     "shorts": "Enable Shorts",
                     "videoPreviews": "Enable Video Previews",
@@ -159,15 +160,15 @@
                     },
                     "launchToOnStartup": {
                         "title": "Launch To on Startup",
-                        "subtitle": "Choose the default page TizenTube opens to on startup"
+                        "subtitle": "Choose the default page AxoTube opens to on startup"
                     },
                     "sortSubscriptionsByAlphabet": "Sort Subscriptions Alphabetically",
                     "disableChannelsOnSidebar": "Disable Channels on Sidebar"
                 }
             },
             "updater": {
-                "title": "TizenTube Cobalt Updater",
-                "menuSubtitle": "Manage TizenTube Cobalt updates",
+                "title": "AxoTube Cobalt Updater",
+                "menuSubtitle": "Manage AxoTube Cobalt updates",
                 "versionSubtitle": "Current version: {{version}}",
                 "options": {
                     "checkForUpdates": "Check for updates",
@@ -176,17 +177,17 @@
             }
         },
         "ttSettings": {
-            "title": "TizenTube Settings",
+            "title": "AxoTube Settings",
             "madeByText": "Made by Aayush with ❤️",
-            "summary": "Open TizenTube Settings"
+            "summary": "Open AxoTube Settings"
         },
         "supportTT": {
-            "title": "Support TizenTube",
-            "subtitle": "❤️ Show support for TizenTube and its development",
+            "title": "Support AxoTube",
+            "subtitle": "❤️ Show support for AxoTube and its development",
             "content": {
-                "1": "If you enjoy using TizenTube and would like to support its development, consider the following:",
+                "1": "If you enjoy using AxoTube and would like to support its development, consider the following:",
                 "2": "1. Star the GitHub repository to help increase its visibility.",
-                "3": "2. Share TizenTube with others.",
+                "3": "2. Share AxoTube with others.",
                 "4": "If you would like to contribute financially, consider donating:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (preferably)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -194,8 +195,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Welcome to TizenTube",
-        "subtitle": "Go to settings and click on TizenTube Settings for settings."
+        "title": "Welcome to AxoTube",
+        "subtitle": "Go to settings and click on AxoTube Settings for settings."
     },
     "sponsorblock": {
         "segments": {

@@ -251,12 +251,12 @@ export default function modernUI(update, parameters) {
       },
       options: [
         {
-          name: t("settings.options.dearrow.options.enableDA"),
+          name: t("settings.options.dearrow.options.enableTitles"),
           icon: "VISIBILITY_OFF",
-          value: "enableDeArrow",
+          value: "enableDeArrowTitles",
         },
         {
-          name: t("settings.options.dearrow.options.enableDAThumbnails"),
+          name: t("settings.options.dearrow.options.enableThumbnails"),
           icon: "TV",
           value: "enableDeArrowThumbnails",
         },
@@ -314,6 +314,11 @@ export default function modernUI(update, parameters) {
           value: "enableFixedUI",
         },
         {
+          name: t("settings.options.misc.options.reducedMotion"),
+          icon: "SLOW_MOTION_VIDEO",
+          value: "enableReducedMotion",
+        },
+        {
           name: t("settings.options.misc.options.hqThumbnails"),
           icon: "VIDEO_QUALITY",
           value: "enableHqThumbnails",
@@ -327,11 +332,6 @@ export default function modernUI(update, parameters) {
           name: t("settings.options.misc.options.shorts"),
           icon: "YOUTUBE_SHORTS_FILL_24",
           value: "enableShorts",
-        },
-        {
-          name: "Premium Logo",
-          icon: "STAR",
-          value: "enablePremiumLogo",
         },
         {
           name: t("settings.options.misc.options.videoPreviews"),

@@ -6,7 +6,7 @@ module.exports.webConfigPage = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>AixoTube Web Config</title>
+<title>axotube Web Config</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
 <style>
   :root { --pico-font-family: "YouTube Sans", Roboto, Arial, sans-serif; }
@@ -43,7 +43,7 @@ module.exports.webConfigPage = `<!DOCTYPE html>
 </head>
 <body>
 <header class="app">
-  <h1>AixoTube Web Config</h1>
+  <h1>axotube Web Config</h1>
   <div style="display:flex;gap:10px;align-items:center;">
     <span class="badge" id="revLabel">revision -</span>
     <span class="status" id="status">connecting...</span>
@@ -77,16 +77,15 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     enableSponsorBlockHighlight: true,
     videoSpeed: 1,
     preferredVideoQuality: "auto",
-    enableDeArrow: true,
-    enableDeArrowThumbnails: false,
+    enableDeArrowTitles: true,
+    enableDeArrowThumbnails: true,
     routeColor: "#0f0f0f",
     routeBackgroundUrl: "",
     themePreset: "default",
-    enableHqThumbnails: true,
+enableHqThumbnails: true,
     enableLongPress: true,
     enableShorts: true,
-    enablePremiumLogo: false,
-    dontCheckUpdateUntil: 0,
+    enableReducedMotion: false,
     enableWhoIsWatchingMenu: false,
     permanentlyEnableWhoIsWatchingMenu: false,
     enableWhosWatchingMenuOnAppExit: false,
@@ -148,7 +147,7 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     enableSponsorBlockInteraction: "SponsorBlock", enableSponsorBlockSelfPromo: "SponsorBlock",
     enableSponsorBlockPreview: "SponsorBlock", enableSponsorBlockMusicOfftopic: "SponsorBlock",
     enableSponsorBlockFiller: "SponsorBlock", enableSponsorBlockHighlight: "SponsorBlock",
-    enableDeArrow: "Player", enableDeArrowThumbnails: "Player", videoSpeed: "Player",
+    enableDeArrowTitles: "Player", enableDeArrowThumbnails: "Player", videoSpeed: "Player",
     preferredVideoQuality: "Player", videoPreferredCodec: "Player",
     enablePreviousNextButtons: "Player", enableSuperThanksButton: "Player",
     enableSpeedControlsButton: "Player", enablePatchingVideoPlayer: "Player",
@@ -159,8 +158,9 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     hideWatchedVideosPages: "Interface", enableHideEndScreenCards: "Interface",
     enableYouThereRenderer: "Interface", enableScreenDimming: "Interface",
     dimmingTimeout: "Interface", dimmingOpacity: "Interface",
-    enablePaidPromotionOverlay: "Interface", enablePremiumLogo: "Interface",
+    enablePaidPromotionOverlay: "Interface",
     enableHqThumbnails: "Interface", enableLongPress: "Interface", enableShorts: "Interface",
+    enableReducedMotion: "Interface",
     enableShowUserLanguage: "Interface", enableShowOtherLanguages: "Interface",
     showWelcomeToast: "Interface", enableWhoIsWatchingMenu: "Interface",
     permanentlyEnableWhoIsWatchingMenu: "Interface", enableWhosWatchingMenuOnAppExit: "Interface",

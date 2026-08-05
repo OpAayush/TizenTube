@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "DeArrow podešavanja",
                 "options": {
-                    "enableDA": "Omogući DeArrow",
-                    "enableDAThumbnails": "Omogući DeArrow sličice"
+                    "enableTitles": "Omogući DeArrow naslove",
+                    "enableThumbnails": "Omogući DeArrow sličice"
                 }
             },
             "misc": {
@@ -134,14 +134,14 @@
                     },
                     "launchToOnStartup": {
                         "title": "Početna stranica pri pokretanju",
-                        "subtitle": "Izaberite podrazumevanu stranicu koja se otvara pri pokretanju TizenTube-a"
+                        "subtitle": "Izaberite podrazumevanu stranicu koja se otvara pri pokretanju AxoTube-a"
                     },
                     "sortSubscriptionsByAlphabet": "Sortiraj pretplate po azbuci"
                 }
             },
             "updater": {
-                "title": "TizenTube Cobalt ažuriranje",
-                "menuSubtitle": "Upravljajte TizenTube Cobalt ažuriranjima",
+                "title": "AxoTube Cobalt ažuriranje",
+                "menuSubtitle": "Upravljajte AxoTube Cobalt ažuriranjima",
                 "versionSubtitle": "Trenutna verzija: {{version}}",
                 "options": {
                     "checkForUpdates": "Proveri ažuriranja",
@@ -150,17 +150,17 @@
             }
         },
         "ttSettings": {
-            "title": "TizenTube podešavanja",
+            "title": "AxoTube podešavanja",
             "madeByText": "Autor: Reis Can (reisxd) uz ❤️",
-            "summary": "Otvori TizenTube podešavanja"
+            "summary": "Otvori AxoTube podešavanja"
         },
         "supportTT": {
-            "title": "Podrži TizenTube",
-            "subtitle": "❤️ Podržite razvoj TizenTube projekta",
+            "title": "Podrži AxoTube",
+            "subtitle": "❤️ Podržite razvoj AxoTube projekta",
             "content": {
-                "1": "Ako uživate u korišćenju TizenTube-a i želite da podržite njegov razvoj, razmotrite sledeće:",
+                "1": "Ako uživate u korišćenju AxoTube-a i želite da podržite njegov razvoj, razmotrite sledeće:",
                 "2": "1. Označite repozitorijum zvezdicom (Star) na GitHub-u radi bolje vidljivosti.",
-                "3": "2. Podelite TizenTube sa drugima.",
+                "3": "2. Podelite AxoTube sa drugima.",
                 "4": "Ako želite da pomognete finansijski, razmotrite donaciju:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (preporučeno)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -168,8 +168,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Dobrodošli u TizenTube",
-        "subtitle": "Idite u podešavanja i kliknite na 'TizenTube podešavanja' za konfiguraciju."
+        "title": "Dobrodošli u AxoTube",
+        "subtitle": "Idite u podešavanja i kliknite na 'AxoTube podešavanja' za konfiguraciju."
     },
     "sponsorblock": {
         "segments": {

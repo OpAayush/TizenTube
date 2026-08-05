@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "„DeArrow“ nustatymai",
                 "options": {
-                    "enableDA": "Įjungti „DeArrow“",
-                    "enableDAThumbnails": "Įjungti „DeArrow“ miniatiūras"
+                    "enableTitles": "Įjungti DeArrow pavadinimus",
+                    "enableThumbnails": "Įjungti „DeArrow“ miniatiūras"
                 }
             },
             "misc": {
@@ -55,7 +55,7 @@
                     "longPress": "Įjungti ilgo paspaudimo veiksmus",
                     "shorts": "Įjungti trumpuosius vaizdo įrašus („Shorts“)",
                     "videoPreviews": "Įjungti vaizdo įrašų peržiūras",
-                    "ttWelcomeMsg": "Rodyti „TizenTube“ pasisveikinimą",
+                    "ttWelcomeMsg": "Rodyti „AxoTube“ pasisveikinimą",
                     "guestSignInReminder": "Rodyti svečio prisijungimo priminimą",
                     "reloadHomeOnStartup": "Atnaujinti pagrindinį puslapį paleidžiant"
                 }
@@ -134,14 +134,14 @@
                     },
                     "launchToOnStartup": {
                         "title": "Pradinis puslapis paleidžiant",
-                        "subtitle": "Pasirinkite numatytąjį puslapį, kurį „TizenTube“ atidarys paleidimo metu"
+                        "subtitle": "Pasirinkite numatytąjį puslapį, kurį „AxoTube“ atidarys paleidimo metu"
                     },
                     "sortSubscriptionsByAlphabet": "Rūšiuoti prenumeratas abėcėlės tvarka"
                 }
             },
             "updater": {
-                "title": "„TizenTube Cobalt“ naujinimo įrankis",
-                "menuSubtitle": "Valdykite „TizenTube Cobalt“ naujinimus",
+                "title": "„AxoTube Cobalt“ naujinimo įrankis",
+                "menuSubtitle": "Valdykite „AxoTube Cobalt“ naujinimus",
                 "versionSubtitle": "Dabartinė versija: {{version}}",
                 "options": {
                     "checkForUpdates": "Tikrinti ar yra naujinimų",
@@ -150,17 +150,17 @@
             }
         },
         "ttSettings": {
-            "title": "„TizenTube“ nustatymai",
+            "title": "„AxoTube“ nustatymai",
             "madeByText": "Sukūrta Reis Can (reisxd) su ❤️",
-            "summary": "Atidaryti „TizenTube“ nustatymus"
+            "summary": "Atidaryti „AxoTube“ nustatymus"
         },
         "supportTT": {
-            "title": "Paremkite „TizenTube“",
-            "subtitle": "❤️ Parodykite paramą „TizenTube“ ir jo vystymui",
+            "title": "Paremkite „AxoTube“",
+            "subtitle": "❤️ Parodykite paramą „AxoTube“ ir jo vystymui",
             "content": {
-                "1": "Jei jums patinka naudotis „TizenTube“ ir norėtumėte paremti projekto vystymą, apsvarstykite šias galimybes:",
+                "1": "Jei jums patinka naudotis „AxoTube“ ir norėtumėte paremti projekto vystymą, apsvarstykite šias galimybes:",
                 "2": "1. Pažymėkite „GitHub“ saugyklą žvaigždute, kad padidintumėte jos matomumą.",
-                "3": "2. Pasidalinkite „TizenTube“ su kitais.",
+                "3": "2. Pasidalinkite „AxoTube“ su kitais.",
                 "4": "Jei norite prisidėti finansiškai, apsvarstykite galimybę paaukoti:",
                 "5": "- „Buy Me A Coffee“: https://www.buymeacoffee.com/reisxd (pageidautina)",
                 "6": "- „GitHub Sponsors“: https://github.com/sponsors/reisxd"
@@ -168,8 +168,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Sveiki! Čia – „TizenTube“",
-        "subtitle": "Eikite į nustatymus ir pasirinkite „„TizenTube“ nustatymai“, jei norite juos keisti."
+        "title": "Sveiki! Čia – „AxoTube“",
+        "subtitle": "Eikite į nustatymus ir pasirinkite „„AxoTube“ nustatymai“, jei norite juos keisti."
     },
     "sponsorblock": {
         "segments": {

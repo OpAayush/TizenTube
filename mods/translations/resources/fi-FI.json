@@ -30,8 +30,8 @@
             "dearrow": {
                 "title": "DeArrow-asetukset",
                 "options": {
-                    "enableDA": "Ota DeArrow käyttöön",
-                    "enableDAThumbnails": "Ota DeArrow-pikkukuvat käyttöön"
+                    "enableTitles": "Ota DeArrow-otsikot käyttöön",
+                    "enableThumbnails": "Ota DeArrow-pikkukuvat käyttöön"
                 }
             },
             "misc": {
@@ -132,12 +132,12 @@
                     },
                     "launchToOnStartup": {
                         "title": "Aloitussivu käynnistyksessä",
-                        "subtitle": "Valitse oletussivu, johon TizenTube avautuu käynnistyksessä"
+                        "subtitle": "Valitse oletussivu, johon AxoTube avautuu käynnistyksessä"
                     }
                 },
                 "updater": {
-                    "title": "TizenTube Cobalt -päivittäjä",
-                    "menuSubtitle": "Hallitse TizenTube Cobaltin päivityksiä",
+                    "title": "AxoTube Cobalt -päivittäjä",
+                    "menuSubtitle": "Hallitse AxoTube Cobaltin päivityksiä",
                     "versionSubtitle": "Nykyinen versio: {{version}}",
                     "options": {
                         "checkForUpdates": "Tarkista päivitykset",
@@ -147,17 +147,17 @@
             }
         },
         "ttSettings": {
-            "title": "TizenTube-asetukset",
+            "title": "AxoTube-asetukset",
             "madeByText": "Tekijä Reis Can (reisxd) ❤️",
-            "summary": "Avaa TizenTube-asetukset"
+            "summary": "Avaa AxoTube-asetukset"
         },
         "supportTT": {
-            "title": "Tue TizenTubea",
-            "subtitle": "❤️ Tue TizenTubea ja sen kehitystä",
+            "title": "Tue AxoTubea",
+            "subtitle": "❤️ Tue AxoTubea ja sen kehitystä",
             "content": {
-                "1": "Jos pidät TizenTuben käytöstä ja haluat tukea sen kehitystä, harkitse seuraavaa:",
+                "1": "Jos pidät AxoTuben käytöstä ja haluat tukea sen kehitystä, harkitse seuraavaa:",
                 "2": "1. Anna GitHub-repositorioon tähti, jotta sen näkyvyys kasvaa.",
-                "3": "2. Jaa TizenTubea muille.",
+                "3": "2. Jaa AxoTubea muille.",
                 "4": "Jos haluat tukea taloudellisesti, harkitse lahjoittamista:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (mieluiten)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -165,8 +165,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Tervetuloa TizenTubeen",
-        "subtitle": "Siirry asetuksiin ja avaa TizenTube-asetukset."
+        "title": "Tervetuloa AxoTubeen",
+        "subtitle": "Siirry asetuksiin ja avaa AxoTube-asetukset."
     },
     "sponsorblock": {
         "segments": {

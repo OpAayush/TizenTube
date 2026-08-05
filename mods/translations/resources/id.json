@@ -32,8 +32,8 @@
             "dearrow": {
                 "title": "Pengaturan DeArrow",
                 "options": {
-                    "enableDA": "Aktifkan DeArrow",
-                    "enableDAThumbnails": "Aktifkan Thumbnail DeArrow"
+                    "enableTitles": "Aktifkan Judul DeArrow",
+                    "enableThumbnails": "Aktifkan Thumbnail DeArrow"
                 }
             },
             "misc": {
@@ -134,14 +134,14 @@
                     },
                     "launchToOnStartup": {
                         "title": "Halaman yang Dibuka saat Startup",
-                        "subtitle": "Pilih halaman default yang dibuka TizenTube saat startup"
+                        "subtitle": "Pilih halaman default yang dibuka AxoTube saat startup"
                     },
                     "sortSubscriptionsByAlphabet": "Sort Subscriptions Alphabetically"
                 }
             },
             "updater": {
-                "title": "Pembaruan TizenTube Cobalt",
-                "menuSubtitle": "Kelola pembaruan TizenTube Cobalt",
+                "title": "Pembaruan AxoTube Cobalt",
+                "menuSubtitle": "Kelola pembaruan AxoTube Cobalt",
                 "versionSubtitle": "Versi saat ini: {{version}}",
                 "options": {
                     "checkForUpdates": "Periksa pembaruan",
@@ -150,17 +150,17 @@
             }
         },
         "ttSettings": {
-            "title": "Pengaturan TizenTube",
+            "title": "Pengaturan AxoTube",
             "madeByText": "Dibuat oleh Reis Can (reisxd) dengan ❤️",
-            "summary": "Buka Pengaturan TizenTube"
+            "summary": "Buka Pengaturan AxoTube"
         },
         "supportTT": {
-            "title": "Dukung TizenTube",
-            "subtitle": "❤️ Tunjukkan dukungan untuk TizenTube dan pengembangannya",
+            "title": "Dukung AxoTube",
+            "subtitle": "❤️ Tunjukkan dukungan untuk AxoTube dan pengembangannya",
             "content": {
-                "1": "Jika Anda senang menggunakan TizenTube dan ingin mendukung pengembangannya, pertimbangkan hal berikut:",
+                "1": "Jika Anda senang menggunakan AxoTube dan ingin mendukung pengembangannya, pertimbangkan hal berikut:",
                 "2": "1. Beri bintang pada repositori GitHub untuk membantu meningkatkan visibilitas.",
-                "3": "2. Bagikan TizenTube kepada orang lain.",
+                "3": "2. Bagikan AxoTube kepada orang lain.",
                 "4": "Jika Anda ingin berkontribusi secara finansial, pertimbangkan untuk berdonasi:",
                 "5": "- Buy Me A Coffee: https://www.buymeacoffee.com/reisxd (disarankan)",
                 "6": "- GitHub Sponsors: https://github.com/sponsors/reisxd"
@@ -168,8 +168,8 @@
         }
     },
     "welcomeMsg": {
-        "title": "Selamat Datang di TizenTube",
-        "subtitle": "Buka pengaturan lalu klik Pengaturan TizenTube untuk mengatur fitur."
+        "title": "Selamat Datang di AxoTube",
+        "subtitle": "Buka pengaturan lalu klik Pengaturan AxoTube untuk mengatur fitur."
     },
     "sponsorblock": {
         "segments": {
