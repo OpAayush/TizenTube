@@ -2,25 +2,11 @@
 // Fixes issue where focused thumbnails revert to default quality
 
 import { configRead, configChangeEmitter } from "../config.js";
-
-var THUMBNAIL_URLS = [
-  "maxresdefault.jpg",
-  "sddefault.jpg",
-  "hqdefault.jpg",
-  "mqdefault.jpg",
-  "default.jpg",
-];
-
-function extractVideoIdFromThumbnailUrl(url) {
-  if (!url) return null;
-  if (!url.includes("i.ytimg.com/vi/")) return null;
-
-  var match = url.match(/\/vi\/([a-zA-Z0-9_-]+)\//);
-  return match ? match[1] : null;
-}
-
-var qualityCache = {};
-var pendingTesters = {};
+import {
+  extractVideoIdFromThumbnailUrl,
+  hqQualityCache,
+  probeBestThumbnailQuality,
+} from "../shared/hqThumbnails.js";
 
 function upgradeThumbnailQuality(element) {
   if (!configRead("enableHqThumbnails")) return;
@@ -50,7 +36,7 @@ function upgradeThumbnailQuality(element) {
     /\/(maxresdefault|sddefault|hqdefault|mqdefault|default)\.jpg/
   );
   var currentQuality = qualityMatch ? qualityMatch[1] : "default";
-  var cachedQuality = qualityCache[videoId];
+  var cachedQuality = hqQualityCache[videoId];
 
   if (cachedQuality && currentQuality + ".jpg" === cachedQuality) {
     element.setAttribute("data-hq-upgraded", videoId);
@@ -75,29 +61,10 @@ function upgradeThumbnailQuality(element) {
     return;
   }
 
-  // Avoid firing duplicate quality probes for the same video
-  if (pendingTesters[videoId]) return;
-  pendingTesters[videoId] = true;
-
-  var maxresUrl = "https://i.ytimg.com/vi/" + videoId + "/maxresdefault.jpg";
-
-  var tester = new Image();
-  tester.onload = function () {
-    pendingTesters[videoId] = false;
-    if (this.naturalWidth === 120 && this.naturalHeight === 90) {
-      qualityCache[videoId] = "hqdefault.jpg";
-      applyFinalQuality("hqdefault.jpg");
-    } else {
-      qualityCache[videoId] = "maxresdefault.jpg";
-      applyFinalQuality("maxresdefault.jpg");
-    }
-  };
-  tester.onerror = function () {
-    pendingTesters[videoId] = false;
-    qualityCache[videoId] = "hqdefault.jpg";
-    applyFinalQuality("hqdefault.jpg");
-  };
-  tester.src = maxresUrl;
+  // Deduplicates concurrent probes for the same video internally
+  probeBestThumbnailQuality(videoId, function (qualityName) {
+    applyFinalQuality(qualityName);
+  });
 }
 
 function initFocusObserver() {

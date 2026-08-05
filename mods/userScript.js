@@ -15,7 +15,7 @@ import "./polyfills.js";
 // ── 2. Fetch polyfill ─────────────────────────────────────────────────────────
 import "whatwg-fetch";
 
-// ── 3. Boot loader (hold native splash until TizenTube is ready) ──────────────
+// ── 3. Boot loader (hold native splash until axotube is ready) ────────────────
 import "./ui/bootLoader.js";
 
 // ── 4. Application modules ────────────────────────────────────────────────────
@@ -42,4 +42,3 @@ import "./features/castReceiver.js";
 import "./ui/customUI.js";
 import "./ui/customGuideAction.js";
 import "./features/autoFrameRate.js";
-import "./features/premiumLogo.js";

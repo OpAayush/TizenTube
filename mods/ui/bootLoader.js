@@ -1,5 +1,5 @@
 // Hold the native YouTube TV splash screen (the #loader with the YouTube logo)
-// on screen until TizenTube has finished initializing (ui.js execute_once_dom_loaded).
+// on screen until axotube has finished initializing (ui.js execute_once_dom_loaded).
 // The app removes #loader itself when its UI mounts; we snapshot its computed
 // style into our own fixed overlay so the user never sees a flash of unpatched UI.
 
