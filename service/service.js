@@ -139,7 +139,7 @@ const dialServer = new dial.Server({
     prefix: "/dial",
     manufacturer: 'Reis Can',
     modelName: 'TizenBrew',
-    friendlyName: modelName ? `TizenTube (${modelName})` : 'TizenTube',
+    friendlyName: modelName ? `axotube (${modelName})` : 'axotube',
     uuid: deviceUuid,
     delegate: {
         getApp(appName) {
