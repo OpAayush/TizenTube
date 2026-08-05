@@ -1,10 +1,25 @@
+// resolveCommand lives on window._yttv[key].instance; scanning all keys on
+// every call is O(n) per toast/modal. Cache the first working root and only
+// rescan when the cached one stops resolving.
+let cachedCommandRoot = null;
+
 function dispatchCommand(cmd, _) {
+  const cached = cachedCommandRoot;
+  if (
+    cached &&
+    cached.instance &&
+    cached.instance.resolveCommand
+  ) {
+    const result = cached.instance.resolveCommand(cmd, _);
+    if (result !== undefined) return result;
+  }
   for (const key in window._yttv) {
     if (
       window._yttv[key] &&
       window._yttv[key].instance &&
       window._yttv[key].instance.resolveCommand
     ) {
+      cachedCommandRoot = window._yttv[key];
       return window._yttv[key].instance.resolveCommand(cmd, _);
     }
   }

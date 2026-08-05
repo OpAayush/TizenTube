@@ -63,6 +63,7 @@ class SponsorBlockHandler {
   attachVideoTimeout = null;
   nextSkipTimeout = null;
   sliderInterval = null;
+  attachVideoAttempts = 0;
   lastSkippedSegmentUUID = null;
   lastSkipTime = 0;
 
@@ -73,6 +74,10 @@ class SponsorBlockHandler {
   skippableCategories = [];
   manualSkippableCategories = [];
   skippedCategories = new Map();
+  nextSegment = null;
+  scheduledSegment = null;
+  repositionFrame = null;
+  mutationFrame = null;
 
   constructor(videoID) {
     this.videoID = videoID;
@@ -128,18 +133,6 @@ class SponsorBlockHandler {
       this.skippableCategories = this.getSkippableCategories();
 
       this.scheduleSkipHandler = () => {
-        const slider = document.querySelector('div[idomkey="slider"]');
-        const sliderRect = slider?.getBoundingClientRect();
-        const isOldUI = !document.querySelector(
-          'div[idomkey="Metadata-Section"]',
-        );
-        if (isOldUI && sliderRect) {
-          this.segmentsoverlay.style.setProperty(
-            "top",
-            `${sliderRect.top}px`,
-            "important",
-          );
-        }
         this.scheduleSkip();
       };
       this.durationChangeHandler = () => this.buildOverlay();
@@ -186,6 +179,11 @@ class SponsorBlockHandler {
 
     this.video = document.querySelector("video");
     if (!this.video) {
+      this.attachVideoAttempts++;
+      if (this.attachVideoAttempts > 100) {
+        console.info(this.videoID, "Gave up waiting for video");
+        return;
+      }
       console.info(this.videoID, "No video yet...");
       this.attachVideoTimeout = setTimeout(() => this.attachVideo(), 100);
       return;
@@ -197,6 +195,26 @@ class SponsorBlockHandler {
     this.video.addEventListener("pause", this.scheduleSkipHandler);
     this.video.addEventListener("timeupdate", this.scheduleSkipHandler);
     this.video.addEventListener("durationchange", this.durationChangeHandler);
+  }
+
+  repositionOverlay() {
+    if (this.repositionFrame || !this.segmentsoverlay) return;
+    this.repositionFrame = requestAnimationFrame(() => {
+      this.repositionFrame = null;
+      if (!this.segmentsoverlay) return;
+      const slider = document.querySelector('div[idomkey="slider"]');
+      const sliderRect = slider?.getBoundingClientRect();
+      const isOldUI = !document.querySelector(
+        'div[idomkey="Metadata-Section"]',
+      );
+      if (isOldUI && sliderRect) {
+        this.segmentsoverlay.style.setProperty(
+          "top",
+          `${sliderRect.top}px`,
+          "important",
+        );
+      }
+    });
   }
 
   buildOverlay() {
@@ -274,17 +292,27 @@ class SponsorBlockHandler {
     }
 
     this.observer = new MutationObserver((mutations) => {
-      mutations.forEach((m) => {
-        if (m.removedNodes) {
-          for (const node of m.removedNodes) {
-            if (node === this.segmentsoverlay) {
-              console.info("bringing back segments overlay");
-              if (this.slider) {
-                this.slider.appendChild(this.segmentsoverlay);
+      if (this.mutationFrame) return;
+      this.mutationFrame = requestAnimationFrame(() => {
+        this.mutationFrame = null;
+        if (!this.segmentsoverlay) return;
+
+        let needsReappend = false;
+        mutations.forEach((m) => {
+          if (m.removedNodes) {
+            for (const node of m.removedNodes) {
+              if (node === this.segmentsoverlay) {
+                console.info("bringing back segments overlay");
+                needsReappend = true;
               }
             }
           }
+        });
+        if (needsReappend && this.slider) {
+          this.slider.appendChild(this.segmentsoverlay);
         }
+
+        this.repositionOverlay();
 
         const progressBar = document.querySelector("ytlr-progress-bar");
         if (progressBar && this.segmentsoverlay) {
@@ -305,7 +333,14 @@ class SponsorBlockHandler {
       });
     });
 
+    let sliderPollAttempts = 0;
     this.sliderInterval = setInterval(() => {
+      sliderPollAttempts++;
+      if (sliderPollAttempts > 120) {
+        clearInterval(this.sliderInterval);
+        this.sliderInterval = null;
+        return;
+      }
       this.slider = document.querySelector(
         "ytlr-redux-connect-ytlr-progress-bar",
       );
@@ -322,9 +357,6 @@ class SponsorBlockHandler {
   }
 
   scheduleSkip() {
-    clearTimeout(this.nextSkipTimeout);
-    this.nextSkipTimeout = null;
-
     if (!this.active || !this.video || !this.segments) {
       return;
     }
@@ -334,18 +366,41 @@ class SponsorBlockHandler {
     }
 
     const currentTime = this.video.currentTime;
-    const nextSegments = this.segments.filter(
-      (seg) =>
-        seg.segment[0] > currentTime - 0.3 &&
-        seg.segment[1] > currentTime - 0.3,
-    );
-    nextSegments.sort((s1, s2) => s1.segment[0] - s2.segment[0]);
 
-    if (!nextSegments.length) {
+    if (
+      !this.nextSegment ||
+      !(
+        this.nextSegment.segment[0] > currentTime - 0.3 &&
+        this.nextSegment.segment[1] > currentTime - 0.3
+      )
+    ) {
+      this.nextSegment = null;
+      const nextSegments = this.segments.filter(
+        (seg) =>
+          seg.segment[0] > currentTime - 0.3 &&
+          seg.segment[1] > currentTime - 0.3,
+      );
+      nextSegments.sort((s1, s2) => s1.segment[0] - s2.segment[0]);
+
+      if (nextSegments.length) {
+        this.nextSegment = nextSegments[0];
+      }
+    }
+
+    if (!this.nextSegment) {
       return;
     }
 
-    const [segment] = nextSegments;
+    this.armSkip(this.nextSegment, currentTime);
+  }
+
+  armSkip(segment, currentTime) {
+    if (segment === this.scheduledSegment && this.nextSkipTimeout) {
+      return;
+    }
+    clearTimeout(this.nextSkipTimeout);
+    this.nextSkipTimeout = null;
+
     const [start, end] = segment.segment;
     const delayMs = Math.max(0, (start - currentTime) * 1000);
 
@@ -357,6 +412,7 @@ class SponsorBlockHandler {
       start - currentTime,
     );
 
+    this.scheduledSegment = segment;
     this.nextSkipTimeout = setTimeout(() => {
       this.performSkip(segment, end);
     }, delayMs);
@@ -434,6 +490,8 @@ class SponsorBlockHandler {
       this.video.currentTime = skipTarget;
       this.lastSkippedSegmentUUID = segment.UUID;
       this.lastSkipTime = Date.now();
+      this.nextSegment = null;
+      this.scheduledSegment = null;
       this.scheduleSkip();
     }
   }
@@ -480,6 +538,16 @@ class SponsorBlockHandler {
     }
 
     this.skippedCategories.clear();
+    this.nextSegment = null;
+    this.scheduledSegment = null;
+    if (this.repositionFrame) {
+      cancelAnimationFrame(this.repositionFrame);
+      this.repositionFrame = null;
+    }
+    if (this.mutationFrame) {
+      cancelAnimationFrame(this.mutationFrame);
+      this.mutationFrame = null;
+    }
   }
 }
 

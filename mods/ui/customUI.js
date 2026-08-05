@@ -1,10 +1,22 @@
 // Custom UI for video player
+//
+// Finds the "YtlrPlayerActionsContainer" class inside window._yttv and
+// wraps it so we can add/remove transport-control buttons (Mini Player/PiP,
+// Speed Controls, Previous/Next) at runtime.
 
 import { extractAssignedFunctions } from "../utils/ASTParser.js";
 import { configRead } from "../config.js";
 import { ButtonRenderer } from "./ytUI.js";
 
+const FEATURED_ACTION = "TRANSPORT_CONTROLS_BUTTON_TYPE_FEATURED_ACTION";
+
 let customUIInitialized = false;
+
+// Reference to the located container class, once found. Store { host, key }
+// so we can re-apply the wrapper (the class lives nested deep inside _yttv,
+// e.g. window._yttv.E.mappings.get("YtlrPlayerActionsContainer").value).
+let containerRef = null;
+let containerLookupDone = false;
 
 function findPlayer() {
   return (
@@ -13,28 +25,201 @@ function findPlayer() {
   );
 }
 
+// Recursively walk _yttv (objects, arrays, Maps, Sets) looking for the
+// player-actions-container class. Bound depth + node count so a big _yttv
+// tree can never hang the page. Returns { host, key, fn } where
+// host[key] === fn, so callers can write a replacement back in place.
+function deepFindContainer(maxNodes) {
+  const marker = "YtlrPlayerActionsContainer";
+  let visited = 0;
+  const seen = new WeakSet();
+
+  function toStringIncludesCtor(fn) {
+    if (visited > maxNodes) return false;
+    visited++;
+    try {
+      const src = fn.toString();
+      return src.includes(marker) && src.includes(FEATURED_ACTION);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function walk(node, depth) {
+    if (!node || depth > 8) return null;
+    if (visited > maxNodes) return null;
+
+    if (typeof node === "function") {
+      if (toStringIncludesCtor(node)) {
+        return { fn: node };
+      }
+      // Walk the function's prototype chain too (class methods).
+      const proto = node.prototype;
+      if (proto && typeof proto === "object") {
+        const r = walk(proto, depth + 1);
+        if (r) return r;
+      }
+      return null;
+    }
+
+    if (typeof node !== "object") return null;
+    if (seen.has(node)) return null;
+    seen.add(node);
+
+    if (node instanceof Map) {
+      for (const [k, v] of node.entries()) {
+        if (visited > maxNodes) return null;
+        if (k === marker && typeof v === "function") {
+          return { host: node, key: k, fn: v };
+        }
+        const r = walk(v, depth + 1);
+        if (r) return r;
+      }
+      return null;
+    }
+    if (node instanceof Set) {
+      for (const v of node.values()) {
+        if (visited > maxNodes) return null;
+        const r = walk(v, depth + 1);
+        if (r) return r;
+      }
+      return null;
+    }
+
+    // Prefer the direct "YtlrPlayerActionsContainer" key for speed.
+    if (node[marker] !== undefined) {
+      const v = node[marker];
+      if (typeof v === "function") return { host: node, key: marker, fn: v };
+      const r = walk(v, depth + 1);
+      if (r) return r;
+    }
+
+    const keys = Object.keys(node);
+    for (const k of keys) {
+      if (visited > maxNodes) return null;
+      const r = walk(node[k], depth + 1);
+      if (r) return r;
+    }
+    return null;
+  }
+
+  return walk(window._yttv, 0);
+}
+
+// Return the container class, looking it up lazily and caching the result.
+function getContainerClass() {
+  if (containerRef) return containerRef;
+  if (containerLookupDone) return null;
+  containerLookupDone = true;
+
+  // Fast-path: some builds expose it directly at a known top-level key.
+  const direct = Object.keys(window._yttv).find((key) => {
+    const v = window._yttv[key];
+    if (typeof v !== "function") return false;
+    try {
+      return v.toString().includes(FEATURED_ACTION);
+    } catch (e) {
+      return false;
+    }
+  });
+  if (direct) {
+    containerRef = { host: window._yttv, key: direct, fn: window._yttv[direct] };
+    return containerRef;
+  }
+
+  // Deep path: walk the tree once, bounded. Prefer a node that mentions the
+  // class name; fall back to any node mentioning FEATURED_ACTION.
+  const strict = deepFindContainer(20000);
+  if (strict) {
+    containerRef = strict;
+    return containerRef;
+  }
+
+  const loose = deepFindContainerLoose(20000);
+  if (loose) containerRef = loose;
+  return containerRef;
+}
+
+// Like deepFindContainer but matches any function mentioning FEATURED_ACTION
+// (used when the class name was minified away).
+function deepFindContainerLoose(maxNodes) {
+  let visited = 0;
+  const seen = new WeakSet();
+
+  function matches(fn) {
+    if (visited > maxNodes) return false;
+    visited++;
+    try {
+      return fn.toString().includes(FEATURED_ACTION);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function walk(node, depth) {
+    if (!node || depth > 8) return null;
+    if (visited > maxNodes) return null;
+
+    if (typeof node === "function") {
+      if (matches(node)) return { fn: node };
+      const proto = node.prototype;
+      if (proto && typeof proto === "object") {
+        const r = walk(proto, depth + 1);
+        if (r) return r;
+      }
+      return null;
+    }
+
+    if (typeof node !== "object") return null;
+    if (seen.has(node)) return null;
+    seen.add(node);
+
+    if (node instanceof Map) {
+      for (const [k, v] of node.entries()) {
+        if (visited > maxNodes) return null;
+        if (k === "YtlrPlayerActionsContainer" && typeof v === "function") {
+          return { host: node, key: k, fn: v };
+        }
+        const r = walk(v, depth + 1);
+        if (r) return r;
+      }
+      return null;
+    }
+    if (node instanceof Set) {
+      for (const v of node.values()) {
+        if (visited > maxNodes) return null;
+        const r = walk(v, depth + 1);
+        if (r) return r;
+      }
+      return null;
+    }
+
+    const keys = Object.keys(node);
+    for (const k of keys) {
+      if (visited > maxNodes) return null;
+      if (k === "YtlrPlayerActionsContainer") {
+        const v = node[k];
+        if (typeof v === "function") return { host: node, key: k, fn: v };
+      }
+      const r = walk(node[k], depth + 1);
+      if (r) return r;
+    }
+    return null;
+  }
+
+  return walk(window._yttv, 0);
+}
+
 function applyPatches() {
   if (customUIInitialized) return;
-
   if (!window._yttv) return;
   if (!findPlayer()) return;
 
-  const methods = Object.keys(window._yttv).filter((key) => {
-    return (
-      typeof window._yttv[key] === "function" &&
-      window._yttv[key]
-        .toString()
-        .includes("TRANSPORT_CONTROLS_BUTTON_TYPE_FEATURED_ACTION")
-    );
-  });
-
-  if (methods.length === 0) {
-    return;
-  }
+  const ref = getContainerClass();
+  if (!ref) return;
 
   try {
-    customUIInitialized = true;
-    const origMethod = window._yttv[methods[0]];
+    const origMethod = ref.fn;
 
     function YtlrPlayerActionsContainer() {
       const args = Array.prototype.slice.call(arguments);
@@ -159,8 +344,7 @@ function applyPatches() {
               if (
                 Array.isArray(res) &&
                 !res.find(
-                  (item) =>
-                    item.type === "TRANSPORT_CONTROLS_BUTTON_TYPE_SPEED",
+                  (item) => item.type === "TRANSPORT_CONTROLS_BUTTON_TYPE_SPEED",
                 )
               ) {
                 res.push({
@@ -232,11 +416,18 @@ function applyPatches() {
 
     if (configRead("enablePatchingVideoPlayer")) {
       YtlrPlayerActionsContainer.prototype = origMethod.prototype;
-      window._yttv[methods[0]] = YtlrPlayerActionsContainer;
+      // Write the wrapper back in place so the app actually uses it.
+      if (ref.host && ref.key) {
+        ref.host[ref.key] = YtlrPlayerActionsContainer;
+      } else {
+        // Fallback: keep the ref pointing at the wrapper.
+        ref.fn = YtlrPlayerActionsContainer;
+      }
     }
+
+    customUIInitialized = true;
   } catch (e) {
     console.error("Custom UI apply failed:", e);
-    customUIInitialized = false;
   }
 }
 
@@ -245,6 +436,9 @@ function checkAndApplyPatches() {
     applyPatches();
   }
 }
+
+let attempts = 0;
+const MAX_ATTEMPTS = 10;
 
 if (
   document.readyState === "complete" ||
@@ -256,8 +450,12 @@ if (
 }
 
 const customUICheckInterval = setInterval(() => {
+  attempts++;
   checkAndApplyPatches();
-  if (customUIInitialized) {
+  // Never loop forever: if the container class could not be located after
+  // the bounded number of attempts (e.g. the constant moved again), give up
+  // so we don't burn CPU scanning window._yttv forever.
+  if (customUIInitialized || attempts >= MAX_ATTEMPTS) {
     clearInterval(customUICheckInterval);
   }
 }, 500);

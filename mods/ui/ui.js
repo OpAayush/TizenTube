@@ -22,6 +22,18 @@ function execute_once_dom_loaded() {
 
   initialized = true;
 
+  const applyReducedMotion = () => {
+    try {
+      document.body.classList.toggle(
+        "axotube-reduced-motion",
+        !!configRead("enableReducedMotion"),
+      );
+    } catch (e) {
+      console.warn("Reduced motion apply failed:", e);
+    }
+  };
+  applyReducedMotion();
+
   const existingStyle = document.querySelector("style[nonce]");
   if (existingStyle) {
     existingStyle.textContent += css;
@@ -172,8 +184,7 @@ function checkInitialization() {
     document.readyState === "complete" ||
     document.readyState === "interactive"
   ) {
-    const videoElement = document.querySelector("video");
-    if (videoElement) {
+    if (window._yttv) {
       execute_once_dom_loaded();
       return;
     }
@@ -184,11 +195,26 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", checkInitialization);
 }
 
+let initAttempts = 0;
 const initInterval = setInterval(() => {
+  initAttempts += 1;
   checkInitialization();
-  if (initialized) {
+  if (initialized || initAttempts >= 100) {
     clearInterval(initInterval);
   }
 }, 100);
 
 configChangeEmitter.addEventListener("configChange", updateStyle);
+
+configChangeEmitter.addEventListener("configChange", (e) => {
+  if (e.detail?.key === "enableReducedMotion") {
+    try {
+      document.body.classList.toggle(
+        "axotube-reduced-motion",
+        !!configRead("enableReducedMotion"),
+      );
+    } catch (err) {
+      console.warn("Reduced motion update failed:", err);
+    }
+  }
+});

@@ -53,9 +53,11 @@ if (document.readyState === "loading") {
   checkSpeedInit();
 }
 
+let speedCheckAttempts = 0;
 const speedCheckInterval = setInterval(() => {
+  speedCheckAttempts += 1;
   checkSpeedInit();
-  if (speedInitialized) {
+  if (speedInitialized || speedCheckAttempts >= 60) {
     clearInterval(speedCheckInterval);
   }
 }, 500);
