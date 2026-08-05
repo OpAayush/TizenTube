@@ -1,6 +1,7 @@
 // Smoke test for the built bundle: drives the patched JSON.parse/stringify
 // wrappers with fixture data and asserts the performance-related behaviors.
-const BUNDLE = 'E:/Aayush/COMPUTER/TO DO Projects/TizenTube/dist/userScript.js';
+const path = require('path');
+const BUNDLE = path.join(__dirname, 'dist', 'userScript.js');
 const fs = require('fs');
 const src = fs.readFileSync(BUNDLE, 'utf8');
 
@@ -49,7 +50,7 @@ const localStorageStub = {
   removeItem(k) { this._data = ''; this[CONFIG_KEY] = undefined; },
   clear() { this._data = ''; this[CONFIG_KEY] = undefined; },
 };
-setConfig({ enableHqThumbnails: true, enableDeArrow: true, enableLongPress: true, enableShorts: false, enableHideWatchedVideos: true, hideWatchedVideosPages: ['home'], hideWatchedVideosThreshold: 80 });
+setConfig({ enableHqThumbnails: true, enableDeArrowTitles: true, enableDeArrowThumbnails: true, enableLongPress: true, enableShorts: false, enableHideWatchedVideos: true, hideWatchedVideosPages: ['home'], hideWatchedVideosThreshold: 80 });
 
 global.localStorage = localStorageStub;
 global.self = globalThis; // bundle expects a browser-like global `self`

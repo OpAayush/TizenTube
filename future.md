@@ -1,6 +1,6 @@
-# TizenTube / axotube — Research & Future Plans
+# axotube — Research & Future Plans
 
-> Working repo: `E:\Aayush\COMPUTER\TO DO Projects\TizenTube` (fork of TizenTube, target: `https://github.com/OpAayush/axotube`)
+> Working repo: `C:\TDP\axotube` (fork of TizenTube, target: `https://github.com/OpAayush/axotube`)
 > Source in `mods/`, build output `dist/userScript.js` (single minified file, built with `npm run build` in `mods/`).
 > Today's date: 2026-08-01
 
@@ -69,20 +69,17 @@ Run: `node smoke-test.js`
 
 ---
 
-## 2. Boot screen: keep native YouTube loader until TizenTube loads (PLANNED)
+## 2. Boot screen: keep native YouTube loader until axotube loads (DONE)
 
-User request: *"is it possible to keep user waiting at YOUTUBE loading screen until tizentube is loaded?"* and *"i would like native youtube loader to stay/slow down/pause until mine loads"*.
+User request: *"is it possible to keep user waiting at YOUTUBE loading screen until axotube is loaded?"* and *"i would like native youtube loader to stay/slow down/pause until mine loads"*.
 
 User rejected a branded custom overlay (`bootScreen.js` idea). Wants the **native** loader held on screen.
 
-### Plan (NOT implemented)
+### Implementation (mods/ui/bootLoader.js)
 
-- New module `mods/ui/bootLoader.js`, imported right after `whatwg-fetch` in `mods/userScript.js`.
-- MutationObserver on `documentElement`: when the app's spinner/loader element appears, capture `cloneNode(true)` into a fixed full-screen black overlay (`z-index` top).
-- Remove the overlay when `mods/ui/ui.js` `execute_once_dom_loaded()` sets `initialized = true` (ui.js:22) — the exact point where all patches/CSS are applied. Plus a ~12s safety timeout.
-- Gate behind a config toggle (default on).
-- Loader selectors unknown for the real TV page; use candidate list (`[id*="loading"]`, `[class*="spinner"]`, `[class*="loader"]`) + fallback to a plain black screen; tune after first TV test.
-- `ui.js` boot flow (for reference): `initialized` flag (line 11); `execute_once_dom_loaded()` (line 14) waits for `document.body && window._yttv`; `checkInitialization()` polls every 100ms (line 294).
+- Captures a snapshot of the native splash (`#loader`) into a fixed full-screen `#ytaf-boot-overlay` (z-index top) as soon as it appears; retries the grab at 50/200/800/2000ms via MutationObserver watch.
+- Holds the overlay until `window.__releaseBootLoader` is called (ui.js `execute_once_dom_loaded`), with a 10s auto-release safety timeout.
+- Kept native loader, no custom branding, matches the user's rejection of `bootScreen.js`.
 
 ---
 
@@ -138,9 +135,20 @@ auto-skip recap, sleep timer, per-video resume, subtitle styling, autoplay toggl
 
 ## 5. Useful architecture reference
 
-- `mods/userScript.js` import order: core-js/stable → polyfills.js → whatwg-fetch → userAgentSpoofing, translations/index, domrect-polyfill, adblock, hqThumbnailsFocusObserver, sponsorblock, ui/ui, ui/speedUI, ui/theme, ui/settings, ui/disableWhosWatching, features/moreSubtitles, features/updater, features/pictureInPicture, features/preferredVideoQuality, features/videoQueuing, features/enableFeatures, ui/customUI, ui/customGuideAction, features/autoFrameRate, features/premiumLogo.
-- Config: localStorage key `"ytaf-configuration"`; 58 keys in `defaultConfig` (enableAdBlock, enableSponsorBlock*, sponsorBlockManualSkips, videoSpeed, preferredVideoQuality:"auto", enableDeArrow, enableDeArrowThumbnails, focusContainerColor, routeColor, enableFixedUI, enableHqThumbnails:true, enableChapters, enableLongPress, enableShorts, enablePremiumLogo, dontCheckUpdateUntil, whosWatching*, enableShowUserLanguage, enableShowOtherLanguages, showWelcomeToast, enablePreviousNextButtons, enableSuperThanksButton, enableSpeedControlsButton, enablePatchingVideoPlayer, enableMPButton, enableSwapMPWithPIP, enablePreviews, enableHideWatchedVideos, hideWatchedVideosThreshold:80, hideWatchedVideosPages, enableHideEndScreenCards, enableYouThereRenderer, lastAnnouncementCheck, enableScreenDimming, dimmingTimeout:60, dimmingOpacity:0.5, enablePaidPromotionOverlay, speedSettingsIncrement:0.25, videoPreferredCodec:"any", launchToOnStartup, reloadHomeOnStartup, disabledSidebarContents, disableChannelsOnSidebar, enableUpdater, autoFrameRate, autoFrameRatePauseVideoFor, enableSigninReminder, sortSubscriptionsByAlphabet).
+- `mods/userScript.js` import order: core-js/stable → polyfills.js → whatwg-fetch → userAgentSpoofing, translations/index, domrect-polyfill, adblock, hqThumbnailsFocusObserver, sponsorblock, ui/ui, ui/speedUI, ui/theme, ui/settings, ui/disableWhosWatching, features/moreSubtitles, features/updater, features/pictureInPicture, features/preferredVideoQuality, features/videoQueuing, features/enableFeatures, ui/customUI, ui/customGuideAction, features/autoFrameRate.
+- Config: localStorage key `"ytaf-configuration"`; 58 keys in `defaultConfig` (enableAdBlock, enableSponsorBlock*, sponsorBlockManualSkips, videoSpeed, preferredVideoQuality:"auto", enableDeArrowTitles, enableDeArrowThumbnails, focusContainerColor, routeColor, enableFixedUI, enableHqThumbnails:true, enableChapters, enableLongPress, enableShorts, dontCheckUpdateUntil, whosWatching*, enableShowUserLanguage, enableShowOtherLanguages, showWelcomeToast, enablePreviousNextButtons, enableSuperThanksButton, enableSpeedControlsButton, enablePatchingVideoPlayer, enableMPButton, enableSwapMPWithPIP, enablePreviews, enableHideWatchedVideos, hideWatchedVideosThreshold:80, hideWatchedVideosPages, enableHideEndScreenCards, enableYouThereRenderer, enableReducedMotion, lastAnnouncementCheck, enableScreenDimming, dimmingTimeout:60, dimmingOpacity:0.5, enablePaidPromotionOverlay, speedSettingsIncrement:0.25, videoPreferredCodec:"any", launchToOnStartup, reloadHomeOnStartup, disabledSidebarContents, disableChannelsOnSidebar, enableUpdater, autoFrameRate, autoFrameRatePauseVideoFor, enableSigninReminder, sortSubscriptionsByAlphabet).
 - Rollup config `mods/rollup.config.js`: input userScript.js → `../dist/userScript.js` iife; plugins json/string(css)/nodeResolve/commonjs; babel Chrome 47 (async-to-generator, class-properties, for-of, object-rest-spread, optional-chaining, nullish-coalescing, logical-assignment, numeric-separator); terser ecma:5, mangle reserved [h5vcc,_yttv,localStorage], passes:1; `\uFFFF`→`\u0000` replace.
 - `window._yttv` = app command registry; `window.tectonicConfig` = feature switches; `resolveCommand`/`dispatchCommand` used for custom actions; `showToast`, `Modal` helpers in `mods/ui/ytUI.js`.
 - DIAL/launcher service in `service/service.js` (port 8085, launches `${tbPackageId}.TizenBrewStandalone`).
 - `h5vcc.tizentube` API: `GetVersion()`, `SetUserAgent()` (used by userAgentSpoofing which writes a random Cobalt-style UA to localStorage then reloads).
+
+---
+
+## 6. Open follow-ups (NOT yet done)
+
+- **Live YT TV pass (Playwright)**: navigate the site like a normal user and verify ad-blocking, UX and performance on the real response shapes; then add missing ad renderers confirmed live (candidates from static analysis: `promotedSparklesTextSearchRenderer` for search ads, `bannerPromoRenderer` for banner promos — do NOT add until seen live, YT TV idomkey/class names are unstable).
+- **Smoke test vs axobrew**: extend `smoke-test.js` to validate the `packageType: 'mods'` contract that `../axobrew`'s `service-nextgen/service/utils/moduleLoader.js` `buildModuleData()` expects (appName, version, websiteURL→appPath, keys[], description, serviceFile, main; optional tizenAppId/evaluateScriptOnDocumentStart) and cross-check `package.json` keys against the bundle's config snapshot. Decide whether to simulate the module fetch (dev-server URL) or just the metadata contract.
+- **deArrowCache eviction**: `deArrowCache` (mods/features/deArrow.js) caches one promise per videoID for the whole session — cap/evict oldest entries to bound memory on long binge sessions.
+- **Dead exports**: `resetDeArrowCache` and `deArrowDeepClone` (mods/features/deArrow.js) are exported but unused — either wire them into the smoke test or drop them.
+- **Dead module**: `mods/ui/chapters.js` is never imported (tree-shaken out of the bundle) and chapters were disabled in adblock.js because YT removed description data — revive when/if YT TV restores chapter data, else delete the file.
+- **Config-key drift**: `mods/config.js` defaults are hand-duplicated in `service/webConfigPage.js` (DEFAULTS/GROUPS presets) and in `mods/ui/settings.js` menus — a drift risk; consider a single source of truth or a smoke assertion that the three stay in sync.
