@@ -50,7 +50,7 @@ const localStorageStub = {
   removeItem(k) { this._data = ''; this[CONFIG_KEY] = undefined; },
   clear() { this._data = ''; this[CONFIG_KEY] = undefined; },
 };
-setConfig({ enableHqThumbnails: true, enableDeArrowTitles: true, enableDeArrowThumbnails: true, enableLongPress: true, enableShorts: false, enableHideWatchedVideos: true, hideWatchedVideosPages: ['home'], hideWatchedVideosThreshold: 80 });
+setConfig({ enableHqThumbnails: true, enableDeArrowTitles: true, enableDeArrowThumbnails: true, enableLongPress: true, enableShorts: false, enableHideWatchedVideos: true, hideWatchedVideosPages: ['home'], hideWatchedVideosThreshold: 80, enableAdBlock: true, enablePaidPromotionOverlay: false });
 
 global.localStorage = localStorageStub;
 global.self = globalThis; // bundle expects a browser-like global `self`
@@ -104,7 +104,7 @@ global.fetch = (url) => {
   return Promise.resolve({
     json: () => Promise.resolve({
       titles: videoID === 'abc123' ? [{ title: 'DEARROWED TITLE', votes: 10 }] : [],
-      thumbnails: [],
+      thumbnails: videoID === 'darrow1' ? [{ timestamp: 123, votes: 9 }] : [],
     }),
   });
 };
@@ -130,7 +130,7 @@ function makeTile(id, title, opts = {}) {
   const tile = {
     tileRenderer: {
       contentType: 'TILE_CONTENT_TYPE_VIDEO',
-      style: 'TILE_STYLE_YTLR_DEFAULT',
+      style: opts.style || 'TILE_STYLE_YTLR_DEFAULT',
       contentId: id,
       metadata: { tileMetadataRenderer: {
         title: { simpleText: title },
@@ -253,5 +253,118 @@ if (!t5.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails[0].url.inclu
 }
 pass('re-processed shelf keeps HQ thumbnails (memo)');
 
-out('\nALL TESTS PASSED');
-process.exit(0);
+// ---- 6. hqify non-default tile style (regression: TILE_STYLE gate removed) ----
+const r6 = browseResponse();
+r6.contents.sectionListRenderer.contents[0].shelfRenderer.content.horizontalListRenderer.items.push(
+  makeTile('wide1', 'Wide Tile', { style: 'TILE_STYLE_YTLR_WIDE' }),
+);
+const parsed6 = patchedParse(JSON.stringify(r6));
+const wideTile = parsed6.contents.sectionListRenderer.contents[0].shelfRenderer.content.horizontalListRenderer.items.find(
+  (i) => i.tileRenderer.contentId === 'wide1',
+);
+if (!wideTile || !wideTile.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails[0].url.includes('maxresdefault.jpg')) {
+  fail('hqify skipped a non-TILE_STYLE_YTLR_DEFAULT tile');
+}
+pass('hqify applies to non-default tile styles');
+
+// ---- 7. adblock JSON patch (ad containers emptied) ----
+const adResp = {
+  adPlacements: [{ entityKey: 'x' }],
+  playerAds: [{ ad: {} }],
+  adSlots: [{ id: 1 }],
+  paidContentOverlay: { some: 'thing' },
+};
+const adOut = patchedParse(JSON.stringify(adResp));
+if (!Array.isArray(adOut.adPlacements) || adOut.adPlacements.length) fail('adPlacements not emptied');
+if (!Array.isArray(adOut.playerAds) || adOut.playerAds.length) {
+  if (adOut.playerAds !== false) fail('playerAds not emptied (got ' + JSON.stringify(adOut.playerAds) + ')');
+}
+if (!Array.isArray(adOut.adSlots) || adOut.adSlots.length) fail('adSlots not emptied');
+if (adOut.paidContentOverlay !== null) fail('paidContentOverlay not nulled');
+pass('adblock empties adPlacements/playerAds/adSlots + nulls paidContentOverlay');
+
+// ---- 8. cross-repo: axotube package.json vs axobrew 'mods' module contract ----
+(async () => {
+  const pkgJson = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+
+  // Mirror of axobrew moduleLoader.buildModuleData() for packageType 'mods'
+  const buildModuleData = (module, moduleJson) => {
+    if (!moduleJson || moduleJson.packageType !== 'mods') return null;
+    const slash = module.indexOf('/');
+    return {
+      fullName: module,
+      appName: moduleJson.appName,
+      version: moduleJson.version,
+      name: module.substring(slash + 1),
+      appPath: moduleJson.websiteURL,
+      keys: moduleJson.keys ? moduleJson.keys : [],
+      moduleType: module.substring(0, slash),
+      packageType: moduleJson.packageType,
+      description: moduleJson.description,
+      serviceFile: moduleJson.serviceFile,
+      tizenAppId: moduleJson.tizenAppId,
+      mainFile: moduleJson.main,
+      evaluateScriptOnDocumentStart: moduleJson.evaluateScriptOnDocumentStart,
+      dev: false,
+    };
+  };
+
+  const modData = buildModuleData('npm/axotube', pkgJson);
+  if (!modData) fail('package.json is not packageType "mods"');
+  for (const k of ['appName', 'version', 'name', 'appPath', 'moduleType', 'packageType', 'description', 'serviceFile', 'mainFile']) {
+    if (typeof modData[k] !== 'string' || !modData[k]) fail('module contract field missing/empty: ' + k);
+  }
+  if (!Array.isArray(modData.keys) || modData.keys.some((k) => typeof k !== 'string')) fail('keys must be an array of strings');
+  if (!modData.appPath.startsWith('http')) fail('appPath (websiteURL) must start with http');
+  for (const f of [modData.mainFile, modData.serviceFile]) {
+    if (!fs.existsSync(path.join(__dirname, f))) fail('bundled file missing on disk: ' + f);
+  }
+  pass('package.json satisfies mods contract (' + modData.moduleType + '/' + modData.name + ' v' + modData.version + ')');
+
+  // ---- 9. deArrow titles applied once fetch resolves (async) ----
+  await new Promise((r) => setTimeout(r, 0));
+  const rt = browseResponse();
+  const pt = patchedParse(JSON.stringify(rt));
+  const tTitle = pt.contents.sectionListRenderer.contents[0].shelfRenderer.content.horizontalListRenderer.items[0]
+    .tileRenderer.metadata.tileMetadataRenderer.title.simpleText;
+  if (tTitle !== 'DEARROWED TITLE') fail('deArrow title not applied, got: ' + tTitle);
+  pass('deArrow title applied from cache after async fetch');
+
+  // ---- 9b. deArrow community thumbnail wins over hqify when both enabled ----
+  const rd = browseResponse();
+  rd.contents.sectionListRenderer.contents[0].shelfRenderer.content.horizontalListRenderer.items.unshift(
+    makeTile('darrow1', 'Community Thumb'),
+  );
+  const pd = patchedParse(JSON.stringify(rd));
+  await new Promise((r) => setTimeout(r, 0));
+  const dTile = pd.contents.sectionListRenderer.contents[0].shelfRenderer.content.horizontalListRenderer.items.find(
+    (i) => i.tileRenderer.contentId === 'darrow1',
+  );
+  const dUrl = dTile.tileRenderer.header.tileHeaderRenderer.thumbnail.thumbnails[0].url;
+  if (!dUrl.includes('dearrow-thumb')) fail('deArrow thumbnail did not win over hqify: ' + dUrl);
+  pass('deArrow community thumbnail overrides hqify (ordering)');
+
+  // ---- 9. brand + version hygiene in bundle ----
+  const bundle = fs.readFileSync(BUNDLE, 'utf8');
+  if (bundle.includes('__AXOTUBE_VERSION__')) fail('raw __AXOTUBE_VERSION__ marker still in bundle');
+  if (!bundle.includes(pkgJson.version)) fail('bundle does not embed package.json version ' + pkgJson.version);
+  if (/premium.?logo/i.test(bundle)) fail('premium logo strings leaked into bundle');
+  if (!bundle.includes('axotube-reduced-motion')) fail('reduced-motion CSS class missing from bundle');
+  if (!bundle.includes('enableDeArrowTitles') || !bundle.includes('enableDeArrowThumbnails')) fail('deArrow config keys missing from bundle');
+  pass('bundle hygiene: version embedded, no premium-logo, reduced-motion + deArrow keys present');
+
+  // ---- 10. drift guard vs real ../axobrew loader (skip if sibling absent) ----
+  const loaderPath = path.join(__dirname, '..', 'axobrew', 'axobrew-app', 'axobrew', 'service-nextgen', 'service', 'utils', 'moduleLoader.js');
+  if (fs.existsSync(loaderPath)) {
+    const loader = fs.readFileSync(loaderPath, 'utf8');
+    const required = ["packageType === 'mods'", 'mainFile: moduleJson.main', 'appPath: moduleJson.websiteURL', 'serviceFile: moduleJson.serviceFile'];
+    const missing = required.filter((f) => !loader.includes(f));
+    if (missing.length) fail('axobrew loader drifted from smoke-test contract: ' + missing.join(' | '));
+    pass('real ../axobrew moduleLoader in sync with simulated mods contract');
+  } else {
+    out('SKIP: ../axobrew moduleLoader.js not found (contract cross-check skipped)');
+  }
+
+  out('\nALL TESTS PASSED');
+  process.exit(0);
+})();

@@ -24,6 +24,20 @@ function dispatchCommand(cmd, _) {
     }
   }
 }
+function canDispatch() {
+  const cached = cachedCommandRoot;
+  if (cached && cached.instance && cached.instance.resolveCommand) return true;
+  for (const key in window._yttv) {
+    if (
+      window._yttv[key] &&
+      window._yttv[key].instance &&
+      window._yttv[key].instance.resolveCommand
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
 function showToast(title, subtitle, thumbnails) {
   const overlayToastRenderer = {
     title: {
@@ -474,6 +488,7 @@ function ButtonRenderer(disabled, text, iconType, command) {
 
 export {
   showToast,
+  canDispatch,
   Modal,
   OverlayPanelHeaderRenderer,
   showModal,

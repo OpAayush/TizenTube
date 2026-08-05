@@ -1,7 +1,7 @@
 {
   "name": "axotube",
   "appName": "axotube",
-  "version": "1.17.0",
+  "version": "1.17.1",
   "description": "axotube is an ad-free and sponsor-free solution for your favourite streaming website on your Tizen (Samsung) TVs.",
   "packageType": "mods",
   "websiteURL": "https://youtube.com/tv?additionalDataUrl=http%3A%2F%2Flocalhost%3A8085%2Fdial%2Fapps%2FYouTube",
@@ -21,5 +21,11 @@
   "repository": {
     "url": "https://github.com/OpAayush/axotube"
   },
-  "license": "GPL-3.0-only"
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "build": "npm run build --prefix mods && npm run build --prefix service",
+    "build:mods": "npm run build --prefix mods",
+    "build:service": "npm run build --prefix service",
+    "test": "node smoke-test.js"
+  }
 }

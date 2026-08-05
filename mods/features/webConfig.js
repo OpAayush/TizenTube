@@ -12,7 +12,7 @@ import {
   nativeJSONStringify,
   configChangeEmitter,
 } from "../config.js";
-import { showToast } from "../ui/ytUI.js";
+import { showToast, canDispatch } from "../ui/ytUI.js";
 
 const WEB_CONFIG_URL = "http://127.0.0.1:8085";
 const POLL_INTERVAL_MS = 5000;
@@ -29,9 +29,13 @@ function isTizen() {
 
 function showServiceToast() {
   if (serviceToastShown) return;
-  serviceToastShown = true;
+  // The toast needs YouTube's resolveCommand to be up. If it isn't yet (the
+  // service can beat YouTube to ready), bail out and let the next poll retry
+  // instead of latching a toast that was silently dropped.
+  if (!isTizen() || !canDispatch()) return;
   try {
     showToast("axotube", "Service connected");
+    serviceToastShown = true;
   } catch (err) {
     // Toast is best-effort; never let it break the sync loop.
   }

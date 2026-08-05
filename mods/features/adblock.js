@@ -127,8 +127,8 @@ JSON.parse = function () {
 
     if (r?.continuationContents?.horizontalListContinuation?.items) {
       const items = r.continuationContents.horizontalListContinuation.items;
-      deArrowify(items);
       hqify(items);
+      deArrowify(items);
       addLongPress(items);
       r.continuationContents.horizontalListContinuation.items = hideVideo(items);
     }
@@ -299,8 +299,8 @@ function processShelves(shelves, shouldAddPreviews = true) {
     }
 
     const items = shelve.shelfRenderer.content.horizontalListRenderer.items;
-    deArrowify(items);
     hqify(items);
+    deArrowify(items);
     addLongPress(items);
     if (shouldAddPreviews) {
       addPreviews(items);
