@@ -29,12 +29,16 @@ function luminance(color) {
 function elementSelector(el) {
   const classes = String(el.className || '')
     .split(/\s+/)
-    .filter(Boolean)
-    .map(function (c) {
-      return '.' + c;
-    })
-    .join('');
-  return el.tagName.toLowerCase() + classes;
+    .filter(Boolean);
+  if (!classes.length) return '';
+  return (
+    el.tagName.toLowerCase() +
+    classes
+      .map(function (c) {
+        return '.' + c;
+      })
+      .join('')
+  );
 }
 
 function textThemeCss(theme) {
@@ -45,9 +49,7 @@ function textThemeCss(theme) {
   const seen = {};
   const els = container.querySelectorAll('*');
   for (let i = 0; i < els.length; i++) {
-    const color = els[i].style.color;
-    if (!color) continue;
-    const lum = luminance(color);
+    const lum = luminance(getComputedStyle(els[i]).color);
     if (lum === null || lum < 0.3) continue;
     const tier = lum > 0.8 ? 0 : lum > 0.55 ? 1 : 2;
     const sel = elementSelector(els[i]);
@@ -55,12 +57,12 @@ function textThemeCss(theme) {
     seen[sel] = true;
     groups[tier].push(sel);
   }
-  let css = '';
+  let textCss = '';
   for (let t = 0; t < 3; t++) {
     if (!groups[t].length) continue;
-    css += groups[t].join(',\n') + ' {\n    color: ' + palette[t] + ' !important;\n  }\n';
+    textCss += groups[t].join(',\n') + ' {\n    color: ' + palette[t] + ' !important;\n  }\n';
   }
-  return css;
+  return textCss;
 }
 
 function updateStyle() {
@@ -116,4 +118,14 @@ function updateStyle() {
 
 document.head.appendChild(style);
 updateStyle();
+setTimeout(updateStyle, 1500);
+
+let reapplyTimer = null;
+if (window.addEventListener) {
+  window.addEventListener('hashchange', function () {
+    if (reapplyTimer) clearTimeout(reapplyTimer);
+    reapplyTimer = setTimeout(updateStyle, 150);
+  });
+}
+
 export default updateStyle;
