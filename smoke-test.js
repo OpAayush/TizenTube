@@ -50,7 +50,7 @@ const localStorageStub = {
   removeItem(k) { this._data = ''; this[CONFIG_KEY] = undefined; },
   clear() { this._data = ''; this[CONFIG_KEY] = undefined; },
 };
-setConfig({ enableHqThumbnails: true, enableDeArrowTitles: true, enableDeArrowThumbnails: true, enableLongPress: true, enableShorts: false, enableHideWatchedVideos: true, hideWatchedVideosPages: ['home'], hideWatchedVideosThreshold: 80, enableAdBlock: true, enablePaidPromotionOverlay: false });
+setConfig({ enableHqThumbnails: true, enableDeArrowTitles: true, enableDeArrowThumbnails: true, enableLongPress: true, enableShorts: false, enableHideWatchedVideos: true, hideWatchedVideosPages: ['home'], hideWatchedVideosThreshold: 80, enableAdBlock: true, enablePaidPromotionOverlay: false, textTheme: 'default' });
 
 global.localStorage = localStorageStub;
 global.self = globalThis; // bundle expects a browser-like global `self`

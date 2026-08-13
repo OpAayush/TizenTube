@@ -72,6 +72,18 @@
                     "routeColor": {
                         "title": "Main Content Color"
                     },
+                    "textTheme": {
+                        "title": "Text Theme",
+                        "options": {
+                            "white": "White",
+                            "gray": "Gray",
+                            "red": "Red",
+                            "blue": "Blue",
+                            "green": "Green",
+                            "purple": "Purple",
+                            "yellow": "Yellow"
+                        }
+                    },
                     "colors": {
                         "default": "Default (Dark)",
                         "black": "Black",

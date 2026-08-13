@@ -12,6 +12,17 @@ const FEATURED_ACTION = "TRANSPORT_CONTROLS_BUTTON_TYPE_FEATURED_ACTION";
 
 let customUIInitialized = false;
 
+// Some YT objects expose own accessor properties (e.g. an `imageData` getter)
+// that throw when their backing state is missing. Reading them while walking
+// _yttv would abort the whole patch pass, so never let a property read throw.
+function safeRead(node, key) {
+  try {
+    return { ok: true, value: node[key] };
+  } catch (e) {
+    return { ok: false, value: undefined };
+  }
+}
+
 // Reference to the located container class, once found. Store { host, key }
 // so we can re-apply the wrapper (the class lives nested deep inside _yttv,
 // e.g. window._yttv.E.mappings.get("YtlrPlayerActionsContainer").value).
@@ -87,8 +98,9 @@ function deepFindContainer(maxNodes) {
     }
 
     // Prefer the direct "YtlrPlayerActionsContainer" key for speed.
-    if (node[marker] !== undefined) {
-      const v = node[marker];
+    const markerRead = safeRead(node, marker);
+    if (markerRead.ok && markerRead.value !== undefined) {
+      const v = markerRead.value;
       if (typeof v === "function") return { host: node, key: marker, fn: v };
       const r = walk(v, depth + 1);
       if (r) return r;
@@ -97,7 +109,9 @@ function deepFindContainer(maxNodes) {
     const keys = Object.keys(node);
     for (const k of keys) {
       if (visited > maxNodes) return null;
-      const r = walk(node[k], depth + 1);
+      const read = safeRead(node, k);
+      if (!read.ok) continue;
+      const r = walk(read.value, depth + 1);
       if (r) return r;
     }
     return null;
@@ -198,10 +212,14 @@ function deepFindContainerLoose(maxNodes) {
     for (const k of keys) {
       if (visited > maxNodes) return null;
       if (k === "YtlrPlayerActionsContainer") {
-        const v = node[k];
-        if (typeof v === "function") return { host: node, key: k, fn: v };
+        const read = safeRead(node, k);
+        if (read.ok && typeof read.value === "function") {
+          return { host: node, key: k, fn: read.value };
+        }
       }
-      const r = walk(node[k], depth + 1);
+      const read = safeRead(node, k);
+      if (!read.ok) continue;
+      const r = walk(read.value, depth + 1);
       if (r) return r;
     }
     return null;

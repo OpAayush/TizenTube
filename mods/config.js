@@ -28,6 +28,7 @@ const defaultConfig = {
   routeColor: "#0f0f0f",
   routeBackgroundUrl: "",
   themePreset: "default",
+  textTheme: "default",
   enableFixedUI: window.h5vcc && window.h5vcc.tizentube ? false : true,
   enableHqThumbnails: true,
   enableLongPress: true,

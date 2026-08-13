@@ -478,6 +478,62 @@ export default function modernUI(update, parameters) {
             },
           ],
         },
+        {
+          name: t("settings.options.theme.options.textTheme.title"),
+          icon: "COLOR_LENS",
+          value: null,
+          menuId: "tt-theme-text-color",
+          options: [
+            {
+              name: t("settings.options.theme.options.colors.default"),
+              icon: "COLOR_LENS",
+              key: "textTheme",
+              value: "default",
+            },
+            {
+              name: t("settings.options.theme.options.textTheme.options.white"),
+              icon: "COLOR_LENS",
+              key: "textTheme",
+              value: "white",
+            },
+            {
+              name: t("settings.options.theme.options.textTheme.options.gray"),
+              icon: "COLOR_LENS",
+              key: "textTheme",
+              value: "gray",
+            },
+            {
+              name: t("settings.options.theme.options.textTheme.options.red"),
+              icon: "COLOR_LENS",
+              key: "textTheme",
+              value: "red",
+            },
+            {
+              name: t("settings.options.theme.options.textTheme.options.blue"),
+              icon: "COLOR_LENS",
+              key: "textTheme",
+              value: "blue",
+            },
+            {
+              name: t("settings.options.theme.options.textTheme.options.green"),
+              icon: "COLOR_LENS",
+              key: "textTheme",
+              value: "green",
+            },
+            {
+              name: t("settings.options.theme.options.textTheme.options.purple"),
+              icon: "COLOR_LENS",
+              key: "textTheme",
+              value: "purple",
+            },
+            {
+              name: t("settings.options.theme.options.textTheme.options.yellow"),
+              icon: "COLOR_LENS",
+              key: "textTheme",
+              value: "yellow",
+            },
+          ],
+        },
       ],
     },
     {
@@ -753,7 +809,7 @@ export default function modernUI(update, parameters) {
                   name: "Library",
                   value: "library",
                 },
-                {
+{
                   name: "More",
                   value: "more",
                 },

@@ -82,6 +82,7 @@ module.exports.webConfigPage = `<!DOCTYPE html>
     routeColor: "#0f0f0f",
     routeBackgroundUrl: "",
     themePreset: "default",
+    textTheme: "default",
 enableHqThumbnails: true,
     enableLongPress: true,
     enableShorts: true,
@@ -125,6 +126,7 @@ enableHqThumbnails: true,
     preferredVideoQuality: ["auto", "2160p", "1440p", "1080p", "720p", "480p", "360p", "240p", "144p"],
     videoPreferredCodec: ["any", "vp9", "av01", "avc1"],
     themePreset: ["default", "black", "darkGray", "charcoal", "navy", "darkRed", "darkGreen", "darkPurple"],
+    textTheme: ["default", "white", "gray", "red", "blue", "green", "purple", "yellow"],
     speedSettingsIncrement: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5]
   };
   var RANGES = {
@@ -154,6 +156,7 @@ enableHqThumbnails: true,
     enableMPButton: "Player", enableSwapMPWithPIP: "Player", enablePreviews: "Player",
     enablePip: "Player", autoFrameRate: "Player", autoFrameRatePauseVideoFor: "Player",
     routeColor: "Theme", routeBackgroundUrl: "Theme", themePreset: "Theme",
+    textTheme: "Theme",
     enableHideWatchedVideos: "Interface", hideWatchedVideosThreshold: "Interface",
     hideWatchedVideosPages: "Interface", enableHideEndScreenCards: "Interface",
     enableYouThereRenderer: "Interface", enableScreenDimming: "Interface",
