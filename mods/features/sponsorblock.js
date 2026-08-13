@@ -111,10 +111,8 @@ class SponsorBlockHandler {
 
       const results = await resp.json();
       const result = results.find((v) => v.videoID === this.videoID);
-      console.info(this.videoID, "Got it:", result);
 
       if (!result || !result.segments || !result.segments.length) {
-        console.info(this.videoID, "No segments found.");
         return;
       }
 
@@ -181,15 +179,11 @@ class SponsorBlockHandler {
     if (!this.video) {
       this.attachVideoAttempts++;
       if (this.attachVideoAttempts > 100) {
-        console.info(this.videoID, "Gave up waiting for video");
         return;
       }
-      console.info(this.videoID, "No video yet...");
       this.attachVideoTimeout = setTimeout(() => this.attachVideo(), 100);
       return;
     }
-
-    console.info(this.videoID, "Video found, binding...");
 
     this.video.addEventListener("play", this.scheduleSkipHandler);
     this.video.addEventListener("pause", this.scheduleSkipHandler);
@@ -219,12 +213,10 @@ class SponsorBlockHandler {
 
   buildOverlay() {
     if (this.segmentsoverlay) {
-      console.info("Overlay already built");
       return;
     }
 
     if (!this.video || !this.video.duration) {
-      console.info("No video duration yet");
       return;
     }
 
@@ -302,7 +294,6 @@ class SponsorBlockHandler {
           if (m.removedNodes) {
             for (const node of m.removedNodes) {
               if (node === this.segmentsoverlay) {
-                console.info("bringing back segments overlay");
                 needsReappend = true;
               }
             }
@@ -404,14 +395,6 @@ class SponsorBlockHandler {
     const [start, end] = segment.segment;
     const delayMs = Math.max(0, (start - currentTime) * 1000);
 
-    console.info(
-      this.videoID,
-      "Scheduling skip of",
-      segment,
-      "in",
-      start - currentTime,
-    );
-
     this.scheduledSegment = segment;
     this.nextSkipTimeout = setTimeout(() => {
       this.performSkip(segment, end);
@@ -427,22 +410,14 @@ class SponsorBlockHandler {
       segment.UUID === this.lastSkippedSegmentUUID &&
       now - this.lastSkipTime < SEGMENT_SKIP_COOLDOWN
     ) {
-      console.info(this.videoID, "Skipping duplicate segment skip");
       return;
     }
 
     if (!this.skippableCategories.includes(segment.category)) {
-      console.info(
-        this.videoID,
-        "Segment",
-        segment.category,
-        "is not skippable, ignoring...",
-      );
       return;
     }
 
     const skipName = barTypes[segment.category]?.name || segment.category;
-    console.info(this.videoID, "Skipping", segment);
 
     if (!this.manualSkippableCategories.includes(segment.category)) {
       const wasSkippedBefore = this.skippedCategories.get(segment.UUID);
@@ -497,8 +472,6 @@ class SponsorBlockHandler {
   }
 
   destroy() {
-    console.info(this.videoID, "Destroying");
-
     this.active = false;
 
     if (this.nextSkipTimeout) {
@@ -562,14 +535,6 @@ window.addEventListener(
       videoID &&
       (!window.sponsorblock || window.sponsorblock.videoID != videoID);
 
-    console.info(
-      "hashchange",
-      videoID,
-      window.sponsorblock,
-      window.sponsorblock ? window.sponsorblock.videoID : null,
-      needsReload,
-    );
-
     if (needsReload) {
       if (window.sponsorblock) {
         try {
@@ -583,8 +548,6 @@ window.addEventListener(
       if (configRead("enableSponsorBlock")) {
         window.sponsorblock = new SponsorBlockHandler(videoID);
         window.sponsorblock.init();
-      } else {
-        console.info("SponsorBlock disabled, not loading");
       }
     }
   },

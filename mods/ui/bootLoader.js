@@ -23,7 +23,6 @@ function release() {
     overlay.parentNode.removeChild(overlay);
   }
   overlay = null;
-  console.info("[axotube] Boot loader released");
 }
 
 window.__releaseBootLoader = release;
@@ -79,7 +78,6 @@ function grab() {
   (document.body || document.documentElement).appendChild(overlay);
   held = true;
   grabbed = true;
-  console.info("[axotube] Boot loader held (#loader captured)");
 }
 
 function watch() {

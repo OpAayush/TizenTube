@@ -22,6 +22,26 @@ function execute_once_dom_loaded() {
 
   initialized = true;
 
+  const applyReducedMotionFlags = () => {
+    try {
+      if (!window.tectonicConfig?.featureSwitches) return;
+      const flags = window.tectonicConfig.featureSwitches;
+      const reduced = !!configRead("enableReducedMotion");
+      // Reduced motion overrides the enableFixedUI "full-animation" wiring
+      // (written below) so it applies last when both are on.
+      flags.enableAnimations = !reduced;
+      flags.enableOnScrollLinearAnimation = !reduced;
+      flags.enableListAnimations = !reduced;
+      flags.horizontalListDurationMs = reduced ? 0 : 200;
+      flags.verticalListDurationMs = reduced ? 0 : 300;
+      flags.listAnimationCurve = reduced ? "linear" : "";
+      flags.enableSkipButtonSlideInAnimation = !reduced;
+      flags.enableLikeButtonAnimation = !reduced;
+    } catch (e) {
+      console.warn("Reduced motion flags apply failed:", e);
+    }
+  };
+
   const applyReducedMotion = () => {
     try {
       document.body.classList.toggle(
@@ -32,6 +52,7 @@ function execute_once_dom_loaded() {
       console.warn("Reduced motion apply failed:", e);
     }
   };
+  applyReducedMotionFlags();
   applyReducedMotion();
 
   const existingStyle = document.querySelector("style[nonce]");
@@ -62,6 +83,8 @@ function execute_once_dom_loaded() {
       console.warn("Could not apply UI fixes:", e);
     }
   }
+
+  applyReducedMotionFlags();
 
   var eventHandler = (evt) => {
     if (configRead("enableScreenDimming")) {
@@ -216,5 +239,6 @@ configChangeEmitter.addEventListener("configChange", (e) => {
     } catch (err) {
       console.warn("Reduced motion update failed:", err);
     }
+    applyReducedMotionFlags();
   }
 });

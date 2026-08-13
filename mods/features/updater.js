@@ -12,10 +12,7 @@ import { configRead } from "../config.js";
 if (window.h5vcc && window.h5vcc.tizentube && configRead("enableUpdater")) {
   const currentEpoch = Math.floor(Date.now() / 1000);
   if (configRead("dontCheckUpdateUntil") > currentEpoch) {
-    console.info(
-      "Skipping update check until",
-      new Date(configRead("dontCheckUpdateUntil") * 1000).toLocaleString(),
-    );
+    // Skipped until user-set date
   } else checkForUpdates();
 }
 
@@ -59,9 +56,6 @@ function checkForUpdates(showNoUpdateToast) {
       } else downloadUrl = release.assets[0].browser_download_url;
 
       if (latestVersion !== currentAppVersion) {
-        console.info(
-          `New version available: ${latestVersion} (current: ${currentAppVersion})`,
-        );
         showModal(
           {
             title: "Update Available",

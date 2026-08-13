@@ -4,6 +4,8 @@
 //   1. Pushes this app's config to the service (GET-able by the web page).
 //   2. Polls for edits made on the web page and applies them live via
 //      configWrite (fires configChange -> theme.js/updateStyle etc.).
+//   3. Polls for phone->TV commands (play/search/browse) and dispatches them
+//      through resolveCommand, and pushes current playback back for the phone.
 // Only active on real Tizen (window.h5vcc.tizentube). Quiet no-op otherwise.
 import {
   configRead,
@@ -12,6 +14,7 @@ import {
   nativeJSONStringify,
   configChangeEmitter,
 } from "../config.js";
+import resolveCommand from "../resolveCommand.js";
 import { showToast, canDispatch } from "../ui/ytUI.js";
 
 const WEB_CONFIG_URL = "http://127.0.0.1:8085";
@@ -107,9 +110,118 @@ function pullAndApply() {
     });
 }
 
+// Phone->TV commands: fetch any pending play/search/browse pushed via the
+// service's /api/command endpoint and dispatch it like a cast would. Called on
+// the same poll interval as the config sync so a phone command lands within
+// ~5s of being sent.
+function consumeCommand() {
+  if (!isTizen() || syncing) return;
+  fetch(`${WEB_CONFIG_URL}/api/command`)
+    .then((res) => res.json())
+    .then((data) => {
+      if (!data || !data.command) return;
+      const cmd = buildCommand(data.command);
+      if (!cmd) return;
+      dispatchWhenReady(cmd);
+      showToast("axotube", "Command received");
+    })
+    .catch(() => {});
+}
+
+// Map a phone command to a resolveCommand payload (mirrors castReceiver).
+function buildCommand(command) {
+  if (!command || typeof command !== "object") return null;
+  if (command.action === "play") {
+    const watch = { videoId: command.videoId };
+    if (command.playlistId) watch.playlistId = command.playlistId;
+    return { watchEndpoint: watch };
+  }
+  if (command.action === "search" && command.query) {
+    return { searchEndpoint: { query: command.query } };
+  }
+  if (command.action === "browse" && command.browseId) {
+    return { browseEndpoint: { browseId: command.browseId } };
+  }
+  return null;
+}
+
+function dispatchWhenReady(cmd) {
+  if (!cmd) return;
+  const dispatch = () => {
+    try {
+      resolveCommand(cmd);
+    } catch (err) {
+      // Best-effort; never break the rest of the script.
+    }
+  };
+
+  if (
+    typeof window !== "undefined" &&
+    window._yttv &&
+    Object.keys(window._yttv).length > 0
+  ) {
+    dispatch();
+    return;
+  }
+
+  let attempts = 0;
+  const interval = setInterval(() => {
+    attempts += 1;
+    const ready =
+      typeof window !== "undefined" &&
+      window._yttv &&
+      Object.keys(window._yttv).length > 0;
+    if (ready || attempts > 50) {
+      clearInterval(interval);
+      if (ready) dispatch();
+    }
+  }, 200);
+}
+
+// Push current playback info to the service so a phone can show now-playing.
+// Reuses the pushIfChanged style guard to avoid spamming on every poll.
+let lastNowPlaying = "";
+
+function pushNowPlaying() {
+  if (!isTizen() || syncing) return;
+  let info = null;
+  try {
+    const video = document.querySelector("video");
+    if (video && video.currentSrc) {
+      const match = location.hash.match(/[?&]v=([^&]+)/);
+      const videoId = match ? match[1] : null;
+      info = {
+        videoId,
+        title:
+          document.querySelector("ytlr-player-header-title")?.textContent ||
+          document.title,
+        state: video.paused ? "paused" : "playing",
+        progress: video.currentTime,
+        duration: video.duration,
+      };
+    }
+  } catch (err) {
+    return;
+  }
+  const serialized = info ? nativeJSONStringify(info) : "none";
+  if (serialized === lastNowPlaying) return;
+  lastNowPlaying = serialized;
+  fetch(`${WEB_CONFIG_URL}/api/nowplaying`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: serialized === "none" ? "null" : serialized,
+  }).catch(() => {});
+}
+
 // Small delay so the app (and its config) is up before the first sync, then
-// keep the service's copy fresh and apply any web-page edits.
+// keep the service's copy fresh, apply web-page edits, consume phone commands,
+// and report now-playing.
 setTimeout(() => {
   pullAndApply();
-  setInterval(pullAndApply, POLL_INTERVAL_MS);
+  consumeCommand();
+  setInterval(() => {
+    pullAndApply();
+    consumeCommand();
+    pushNowPlaying();
+  }, POLL_INTERVAL_MS);
 }, 3000);

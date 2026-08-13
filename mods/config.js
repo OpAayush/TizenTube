@@ -126,7 +126,6 @@ export function configRead(key) {
 }
 
 export function configWrite(key, value) {
-  console.info("Setting key", key, "to", value);
   localConfig[key] = value;
   tryPersistConfig();
   configChangeEmitter.dispatchEvent(

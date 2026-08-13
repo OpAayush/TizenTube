@@ -55,6 +55,14 @@ const PORT = 8085;
 let storedConfig = {};
 let configRevision = 0;
 
+// Phone->TV control bridge. A phone app pushes commands here
+// (POST /api/command); the axotube userscript polls GET /api/command on its
+// existing 5s sync loop, executes them (play/search), and clears the slot.
+// The userscript also pushes its current playback state so a phone can show
+// "now playing" (GET /api/nowplaying).
+let pendingCommand = null;
+let nowPlaying = null;
+
 app.get("/", (req, res) => {
     res.type("html").send(webConfigPage);
 });
@@ -80,6 +88,50 @@ app.post("/api/config/push", (req, res) => {
         storedConfig = body;
     }
     res.json({ ok: true });
+});
+
+// Accept a phone->TV command (play/search). The userscript consumes it on its
+// next poll via GET /api/command.
+app.post("/api/command", (req, res) => {
+    const body = req.body;
+    if (!body || typeof body !== "object") {
+        res.status(400).json({ ok: false, error: "Invalid command payload" });
+        return;
+    }
+    const { action, videoId, playlistId, query, browseId } = body;
+    if (action === "play" && typeof videoId === "string" && videoId) {
+        pendingCommand = {
+            action: "play",
+            videoId,
+            playlistId: typeof playlistId === "string" ? playlistId : undefined,
+        };
+    } else if (action === "search" && typeof query === "string" && query.trim()) {
+        pendingCommand = { action: "search", query: query.trim() };
+    } else if (action === "browse" && typeof browseId === "string" && browseId) {
+        pendingCommand = { action: "browse", browseId };
+    } else {
+        res.status(400).json({ ok: false, error: "Unsupported command" });
+        return;
+    }
+    res.json({ ok: true, command: pendingCommand });
+});
+
+// The userscript polls this and atomically takes + clears the pending command.
+app.get("/api/command", (req, res) => {
+    const taken = pendingCommand;
+    pendingCommand = null;
+    res.json({ command: taken });
+});
+
+// The userscript pushes its current playback state here periodically.
+app.post("/api/nowplaying", (req, res) => {
+    const body = req.body;
+    nowPlaying = body && typeof body === "object" ? body : null;
+    res.json({ ok: true });
+});
+
+app.get("/api/nowplaying", (req, res) => {
+    res.json({ nowPlaying });
 });
 
 // Return JSON errors (e.g. malformed JSON body) instead of the HTML error page.

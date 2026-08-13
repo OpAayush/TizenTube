@@ -261,5 +261,3 @@ if (document.readyState === "loading") {
 } else {
   setTimeout(initFocusObserver, 1000);
 }
-
-console.log("HQ Thumbnails Focus Observer initialized");

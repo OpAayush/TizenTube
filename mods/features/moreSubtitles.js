@@ -275,8 +275,6 @@ function patchSubtitleMenu() {
       console.warn(
         "axotube Subtitle Localization: Could not find resolveCommand instance.",
       );
-    } else {
-      console.log("axotube Subtitle Localization: Already patched.");
     }
     return;
   }
@@ -316,11 +314,6 @@ function patchSubtitleMenu() {
           if (
             !languageExistsInMenu(items, userLanguage.code, userLanguage.name)
           ) {
-            console.log(
-              `%c[axotube Subtitle Localization] Adding user's local language: ${userLanguage.name} (${userLanguage.code})`,
-              "background: #2196F3; color: #ffffff; font-size: 14px; font-weight: bold;",
-            );
-
             const userLanguageOption = createLanguageOption(
               userLanguage.code,
               userLanguage.name,
@@ -357,11 +350,6 @@ function patchSubtitleMenu() {
               existingLanguages.add(userLanguage.code);
               existingLanguages.add(userLanguage.name);
             }
-          } else {
-            console.log(
-              `%c[axotube Subtitle Localization] User's language ${userLanguage.name} already exists in menu`,
-              "background: #4CAF50; color: #ffffff; font-size: 12px;",
-            );
           }
         } else {
           console.warn(
@@ -380,11 +368,6 @@ function patchSubtitleMenu() {
           .sort(([, a], [, b]) => a.localeCompare(b));
 
         if (missingLanguages.length > 0) {
-          console.log(
-            `%c[axotube Subtitle Localization] Adding "Tizen Languages" section with ${missingLanguages.length} additional languages`,
-            "background: #FF9800; color: #ffffff; font-size: 12px;",
-          );
-
           // Add section title
           items.push(createSectionTitle("Other Languages"));
 
@@ -392,16 +375,6 @@ function patchSubtitleMenu() {
           missingLanguages.forEach(([code, name]) => {
             items.push(createLanguageOption(code, name));
           });
-
-          console.log(
-            `%c[axotube Subtitle Localization] Added "Tizen Languages" section`,
-            "background: #FF9800; color: #ffffff; font-size: 12px;",
-          );
-        } else {
-          console.log(
-            `%c[axotube Subtitle Localization] All languages already present in menu`,
-            "background: #4CAF50; color: #ffffff; font-size: 12px;",
-          );
         }
       }
     }
@@ -411,7 +384,6 @@ function patchSubtitleMenu() {
   };
 
   yttvInstance.instance.resolveCommand.isPatchedBySubtitleLocalization = true;
-  console.log("axotube Subtitle Localization: Patch successful!");
   isPatched = true;
 }
 
@@ -432,7 +404,3 @@ if (document.readyState === "loading") {
 } else {
   patchSubtitleMenu();
 }
-
-console.log(
-  "axotube Subtitle Localization: Module loaded, waiting for YouTube TV...",
-);
