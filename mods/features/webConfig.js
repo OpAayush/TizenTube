@@ -46,12 +46,19 @@ function showServiceToast() {
 
 // Push the device config only when it actually differs from what we last sent.
 // This keeps the 5s poll free of per-tick POST traffic (the old code pushed the
-// whole snapshot unconditionally on every pull).
+// whole snapshot unconditionally on every pull). The push carries the last
+// service revision the device has APPLIED (appliedRevision): the service
+// rejects a push from a device that is behind (e.g. a boot-time push that
+// predates an unsynced web-page edit), so a stale snapshot can never clobber a
+// fresh web-page save.
 function pushIfChanged() {
   if (!isTizen() || syncing) return;
   let serialized;
   try {
-    serialized = nativeJSONStringify(configSnapshot());
+    serialized = nativeJSONStringify({
+      revision: appliedRevision,
+      config: configSnapshot(),
+    });
   } catch (err) {
     return;
   }
@@ -100,9 +107,11 @@ function pullAndApply() {
           configWrite(key, value);
         }
       });
-      // Applying remote edits updates the local snapshot; make sure the device
-      // (with any extra local-only keys) is reflected back to the service.
-      pushIfChanged();
+      // Applying remote edits fires configChange -> schedulePush, which
+      // reflects the device snapshot (with any extra local-only keys) back to
+      // the service once this poll's syncing flag is released. The direct
+      // pushIfChanged() call here is skipped on purpose: it would run while
+      // syncing is still true and the revision-gated push would be rejected.
     })
     .catch(() => {})
     .then(() => {
@@ -120,6 +129,14 @@ function consumeCommand() {
     .then((res) => res.json())
     .then((data) => {
       if (!data || !data.command) return;
+      if (data.command.action === "reload") {
+        try {
+          window.location.reload();
+        } catch (err) {
+          // Best-effort; the app would pick the reload up on the next poll.
+        }
+        return;
+      }
       const cmd = buildCommand(data.command);
       if (!cmd) return;
       dispatchWhenReady(cmd);

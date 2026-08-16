@@ -52,6 +52,7 @@ module.exports.webConfigPage = `<!DOCTYPE html>
 <div class="actions">
   <input type="search" id="filter" placeholder="Filter keys..." />
   <button id="btnSave">Save to TV</button>
+  <button class="secondary outline" id="btnSaveReload">Save &amp; Reload TV</button>
   <button class="secondary outline" id="btnRefresh">Reload from TV</button>
   <button class="secondary outline" id="btnDefaults">Reset to defaults</button>
 </div>
@@ -375,6 +376,17 @@ enableHqThumbnails: true,
     api("/api/config", "POST", collect()).then(function (d) {
       if (d.ok) { revision = d.revision; revLabel.textContent = "revision " + revision; showToast("Saved to TV (rev " + revision + ")"); }
       else showToast("Save failed: " + (d.error || "unknown"));
+    }).catch(function () { showToast("Save failed - service unreachable"); });
+  });
+
+  document.getElementById("btnSaveReload").addEventListener("click", function () {
+    api("/api/config", "POST", collect()).then(function (d) {
+      if (!d.ok) { showToast("Save failed: " + (d.error || "unknown")); return; }
+      revision = d.revision;
+      revLabel.textContent = "revision " + revision;
+      api("/api/command", "POST", { action: "reload" }).then(function (r) {
+        showToast(r && r.ok ? "Saved — TV reloading" : "Saved (reload failed)");
+      }).catch(function () { showToast("Saved (reload failed)"); });
     }).catch(function () { showToast("Save failed - service unreachable"); });
   });
 

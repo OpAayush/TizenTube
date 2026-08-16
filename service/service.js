@@ -83,9 +83,17 @@ app.post("/api/config", (req, res) => {
 });
 
 app.post("/api/config/push", (req, res) => {
+    // The userscript pushes its applied config state, carrying the service
+    // revision it has already applied. A push from a device that is behind
+    // (e.g. a boot-time push that predates the latest web-page edit) must not
+    // clobber the newer stored config — otherwise the edit is lost silently
+    // and the revision guard in the userscript never re-applies it.
     const body = req.body;
     if (body && typeof body === "object") {
-        storedConfig = body;
+        const rev = typeof body.revision === "number" ? body.revision : -1;
+        if (rev === configRevision && body.config && typeof body.config === "object") {
+            storedConfig = body.config;
+        }
     }
     res.json({ ok: true });
 });
@@ -109,6 +117,8 @@ app.post("/api/command", (req, res) => {
         pendingCommand = { action: "search", query: query.trim() };
     } else if (action === "browse" && typeof browseId === "string" && browseId) {
         pendingCommand = { action: "browse", browseId };
+    } else if (action === "reload") {
+        pendingCommand = { action: "reload" };
     } else {
         res.status(400).json({ ok: false, error: "Unsupported command" });
         return;
