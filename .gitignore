@@ -6,5 +6,7 @@ package-lock.json
 .history
 .npmrc
 .playwright-mcp
-AGENTS.md
-.cortexkit/*
+standalone/userscript/
+standalone/service/dist/
+standalone/.buildResult/
+standalone/release/
