@@ -5,8 +5,8 @@ node_modules/
 package-lock.json
 .history
 .npmrc
-.playwright-mcp
 standalone/userscript/
 standalone/service/dist/
 standalone/.buildResult/
 standalone/release/
+icons.txt

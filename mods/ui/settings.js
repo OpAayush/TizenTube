@@ -57,11 +57,11 @@ export default function modernUI(update, parameters) {
       options: [
         {
           name: "GitHub",
-          link: "https://github.com/OpAayush/axotube",
+          link: "https://github.com/TizenDroid/axotube",
         },
         {
           name: "Discord",
-          link: "https://discord.gg/m2P7v8Y2qR",
+          link: "https://discord.gg/UDb8nak5YD",
         },
       ].map((option) => {
         return {
@@ -521,13 +521,17 @@ export default function modernUI(update, parameters) {
               value: "green",
             },
             {
-              name: t("settings.options.theme.options.textTheme.options.purple"),
+              name: t(
+                "settings.options.theme.options.textTheme.options.purple",
+              ),
               icon: "COLOR_LENS",
               key: "textTheme",
               value: "purple",
             },
             {
-              name: t("settings.options.theme.options.textTheme.options.yellow"),
+              name: t(
+                "settings.options.theme.options.textTheme.options.yellow",
+              ),
               icon: "COLOR_LENS",
               key: "textTheme",
               value: "yellow",
@@ -809,7 +813,7 @@ export default function modernUI(update, parameters) {
                   name: "Library",
                   value: "library",
                 },
-{
+                {
                   name: "More",
                   value: "more",
                 },

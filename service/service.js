@@ -173,7 +173,7 @@ const apps = {
                             }
                         )])
                     ]
-                ), `${tbPackageId}.TizenBrewStandalone`);
+                ), `${tbPackageId}.${global.isAxoTubeStandalone ? 'AxoTubeStandalone' : 'TizenBrewStandalone'}`);
         }
     }
 };
@@ -225,7 +225,10 @@ const dialServer = new dial.Server({
                     return acc;
                 }, {});
                 
-                if (parsedData.yumi) {
+                // The official cast clients send `yumi=` with an EMPTY value;
+                // check key presence, not truthiness, or the "app already
+                // running" fast path is skipped and the app is relaunched.
+                if (typeof parsedData.yumi !== 'undefined') {
                     app.additionalData = parsedData;
                     app.state = "running"
                     callback("");
@@ -258,7 +261,7 @@ setInterval(() => {
         tizen.application.getAppsContext((appsContext) => {
             const tbPackageId = tizenGetPackageId();
             if (!tbPackageId) return;
-            const running = appsContext.find(app => app.appId === `${tbPackageId}.TizenBrewStandalone`);
+            const running = appsContext.find(app => app.appId === `${tbPackageId}.${global.isAxoTubeStandalone ? 'AxoTubeStandalone' : 'TizenBrewStandalone'}`);
             if (!running) {
                 apps["YouTube"].state = "stopped";
                 apps["YouTube"].pid = null;

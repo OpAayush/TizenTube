@@ -102,7 +102,9 @@ function pullAndApply() {
       if (!remote || typeof remote !== "object") return;
       Object.keys(remote).forEach((key) => {
         const value = remote[key];
-        if (typeof value === "undefined" || value === null) return;
+        // null is a legitimate value (e.g. launchToOnStartup cleared on the
+        // web page) and must reach the device; only undefined means absent.
+        if (typeof value === "undefined") return;
         if (configRead(key) !== value) {
           configWrite(key, value);
         }
