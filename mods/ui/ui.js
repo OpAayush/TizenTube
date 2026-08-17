@@ -149,7 +149,10 @@ function execute_once_dom_loaded() {
 
   setTimeout(() => {
     if (configRead("showWelcomeToast")) {
-      showToast(t("welcomeMsg.title"), `${t("welcomeMsg.subtitle")} · v${AXOTUBE_VERSION}`);
+      showToast(
+        t("welcomeMsg.title"),
+        `${t("welcomeMsg.subtitle")} · v${AXOTUBE_VERSION}`,
+      );
     }
   }, 1000);
 
@@ -197,7 +200,27 @@ function execute_once_dom_loaded() {
     }
   }
 
-  patchResolveCommand();
+  ensureResolveCommandPatched();
+}
+
+// window._yttv can exist (and pass the readiness check above) before
+// .instance.resolveCommand is populated -- patchResolveCommand() then finds
+// nothing to wrap and silently no-ops. Since execute_once_dom_loaded only
+// ever runs once (the `initialized` latch above), that used to mean the
+// patch was simply never retried and every settings/custom-action button
+// fell through to YouTube's native resolveCommand ("Unhandled command.").
+// Retry independently of that latch until the patch actually takes.
+let resolveCommandPatchAttempts = 0;
+function ensureResolveCommandPatched() {
+  if (patchResolveCommand()) return;
+  resolveCommandPatchAttempts += 1;
+  if (resolveCommandPatchAttempts >= 100) {
+    console.warn(
+      "axotube: gave up waiting for window._yttv instance.resolveCommand to appear",
+    );
+    return;
+  }
+  setTimeout(ensureResolveCommandPatched, 100);
 }
 
 function checkInitialization() {

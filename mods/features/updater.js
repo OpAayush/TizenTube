@@ -8,12 +8,19 @@ import {
 } from "../ui/ytUI.js";
 import { configRead } from "../config.js";
 
-// If axotube is not running on Cobalt, do nothing
-if (window.h5vcc && window.h5vcc.tizentube && configRead("enableUpdater")) {
-  const currentEpoch = Math.floor(Date.now() / 1000);
-  if (configRead("dontCheckUpdateUntil") > currentEpoch) {
-    // Skipped until user-set date
-  } else checkForUpdates();
+// If axotube is not running on Cobalt, do nothing. This runs synchronously
+// at module-eval time inside a single IIFE bundle (see rollup.config.js) --
+// any uncaught throw here aborts every import that follows (webConfig.js,
+// castReceiver.js, customUI.js, ...), so this is wrapped defensively.
+try {
+  if (window.h5vcc && window.h5vcc.tizentube && configRead("enableUpdater")) {
+    const currentEpoch = Math.floor(Date.now() / 1000);
+    if (configRead("dontCheckUpdateUntil") > currentEpoch) {
+      // Skipped until user-set date
+    } else checkForUpdates();
+  }
+} catch (err) {
+  console.error("axotube updater: init failed, continuing without it", err);
 }
 
 function getLatestRelease() {
@@ -28,6 +35,13 @@ function getLatestRelease() {
 }
 
 function checkForUpdates(showNoUpdateToast) {
+  if (
+    !window.h5vcc ||
+    !window.h5vcc.tizentube ||
+    typeof window.h5vcc.tizentube.GetVersion !== "function"
+  ) {
+    return;
+  }
   const currentAppVersion = window.h5vcc.tizentube.GetVersion();
   const currentEpoch = Math.floor(Date.now() / 1000);
 

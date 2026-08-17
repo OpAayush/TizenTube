@@ -34,13 +34,24 @@ export function findFunction(funcName) {
 
 // Patch resolveCommand to be able to change axotube settings
 
+// Returns true once resolveCommand has actually been wrapped, false if no
+// _yttv instance was ready yet. window._yttv can exist as an early stub
+// before .instance.resolveCommand is populated, so callers must retry on
+// false rather than treating "ran once" as "succeeded" -- see ui.js.
 export function patchResolveCommand() {
+  let patched = false;
   for (const key in window._yttv) {
     if (
       window._yttv[key] &&
       window._yttv[key].instance &&
       window._yttv[key].instance.resolveCommand
     ) {
+      // Idempotency guard: patchResolveCommand can now be called from a
+      // retry loop, so don't double-wrap an already-patched instance.
+      if (window._yttv[key].instance.resolveCommand.__axotubePatched) {
+        patched = true;
+        continue;
+      }
       const ogResolve = window._yttv[key].instance.resolveCommand;
       window._yttv[key].instance.resolveCommand = function (cmd, _) {
         if (cmd.setClientSettingEndpoint) {
@@ -229,8 +240,11 @@ export function patchResolveCommand() {
 
         return ogResolve.call(this, cmd, _);
       };
+      window._yttv[key].instance.resolveCommand.__axotubePatched = true;
+      patched = true;
     }
   }
+  return patched;
 }
 
 function customAction(action, parameters) {

@@ -1107,7 +1107,10 @@ export default function modernUI(update, parameters) {
             subtitle: t("settings.options.updater.menuSubtitle"),
           },
           subtitle: t("settings.options.updater.versionSubtitle", {
-            version: window.h5vcc.tizentube.GetVersion(),
+            version:
+              typeof window.h5vcc.tizentube.GetVersion === "function"
+                ? window.h5vcc.tizentube.GetVersion()
+                : "unknown",
           }),
           options: [
             buttonItem(
