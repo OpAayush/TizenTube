@@ -16,6 +16,7 @@ import {
 } from "../config.js";
 import resolveCommand from "../resolveCommand.js";
 import { showToast, canDispatch } from "../ui/ytUI.js";
+import { fetchWithTimeout } from "../shared/fetch.js";
 
 const WEB_CONFIG_URL = "http://127.0.0.1:8085";
 const POLL_INTERVAL_MS = 5000;
@@ -34,9 +35,11 @@ function showServiceToast() {
   if (serviceToastShown) return;
   // The toast needs YouTube's resolveCommand to be up. If it isn't yet (the
   // service can beat YouTube to ready), bail out and let the next poll retry
-  // instead of latching a toast that was silently dropped.
-  if (!isTizen() || !canDispatch()) return;
+  // instead of latching a toast that was silently dropped. canDispatch() walks
+  // window._yttv, whose getters can throw on half-initialized objects — keep
+  // it inside the guard so a throw can never kill the poll's apply loop.
   try {
+    if (!isTizen() || !canDispatch()) return;
     showToast("axotube", "Service connected");
     serviceToastShown = true;
   } catch (err) {
@@ -66,7 +69,7 @@ function pushIfChanged() {
   if (serialized === lastPushed) return;
   lastPushed = serialized;
   syncing = true;
-  fetch(`${WEB_CONFIG_URL}/api/config/push`, {
+  fetchWithTimeout(`${WEB_CONFIG_URL}/api/config/push`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: serialized,
@@ -91,7 +94,7 @@ configChangeEmitter.addEventListener("configChange", schedulePush);
 function pullAndApply() {
   if (!isTizen() || syncing) return;
   syncing = true;
-  fetch(`${WEB_CONFIG_URL}/api/config`)
+  fetchWithTimeout(`${WEB_CONFIG_URL}/api/config`)
     .then((res) => res.json())
     .then((data) => {
       if (!data || typeof data.revision !== "number") return;
@@ -105,19 +108,28 @@ function pullAndApply() {
         // null is a legitimate value (e.g. launchToOnStartup cleared on the
         // web page) and must reach the device; only undefined means absent.
         if (typeof value === "undefined") return;
-        if (configRead(key) !== value) {
-          configWrite(key, value);
+        try {
+          if (configRead(key) !== value) {
+            configWrite(key, value);
+          }
+        } catch (err) {
+          // One bad key must not abort the rest of the apply loop.
         }
       });
       // Applying remote edits fires configChange -> schedulePush, which
       // reflects the device snapshot (with any extra local-only keys) back to
-      // the service once this poll's syncing flag is released. The direct
-      // pushIfChanged() call here is skipped on purpose: it would run while
-      // syncing is still true and the revision-gated push would be rejected.
+      // the service once this poll's syncing flag is released.
     })
     .catch(() => {})
     .then(() => {
       syncing = false;
+      // Reflect the device snapshot back to the service after every pull.
+      // A fresh service (empty store) gets seeded at boot this way, and a
+      // post-apply snapshot with extra local-only keys reaches the web page.
+      // Deduped by lastPushed, so it only posts when the snapshot differs;
+      // it carries the revision we just applied, so the service's gate accepts
+      // it — and rejects it if a web-page edit landed in between.
+      pushIfChanged();
     });
 }
 
@@ -127,7 +139,7 @@ function pullAndApply() {
 // ~5s of being sent.
 function consumeCommand() {
   if (!isTizen() || syncing) return;
-  fetch(`${WEB_CONFIG_URL}/api/command`)
+  fetchWithTimeout(`${WEB_CONFIG_URL}/api/command`)
     .then((res) => res.json())
     .then((data) => {
       if (!data || !data.command) return;
@@ -225,7 +237,7 @@ function pushNowPlaying() {
   const serialized = info ? nativeJSONStringify(info) : "none";
   if (serialized === lastNowPlaying) return;
   lastNowPlaying = serialized;
-  fetch(`${WEB_CONFIG_URL}/api/nowplaying`, {
+  fetchWithTimeout(`${WEB_CONFIG_URL}/api/nowplaying`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: serialized === "none" ? "null" : serialized,
